@@ -25,6 +25,6 @@ npm install @angelitosystems/print-bridge
 |---|---|---|
 | `@angelitosystems/print-bridge` | Núcleo (cualquier framework) | Publicado 0.4.0 |
 | `@angelitosystems/print-bridge-react` | React y Next.js | Publicado 0.1.0 |
-| `@angelitosystems/print-bridge-angular` | Angular | Publicado 0.1.0 |
+| `@angelitosystems/print-bridge-angular` | Angular | Publicado 0.1.1 |
 | `@angelitosystems/print-bridge-svelte` | Svelte / SvelteKit | Publicado 0.1.0 |
 | `@angelitosystems/print-bridge-vue` | Vue / Nuxt | Publicado 0.1.0 |

@@ -20,7 +20,7 @@ Fecha: 2026-11-02. Fuente de verdad de lo **verificado**; "publicado" solo cuand
 | SvelteKit / Nuxt | — | — | — | — | Sin paquete propio: `providePrintBridge` (contexto por petición) y el plugin Vue en `.client.ts` cubren SSR. |
 | `@angelitosystems/print-bridge-vue` | 0.1.0 | ✔ | ✔ 4 (plugin, composables, 2 componentes = 1 conexión, limpieza al desmontar, SSR sin contactar al agente) | — (mock) | ✔ |
 | `@angelitosystems/print-bridge-svelte` | 0.1.0 | ✔ | ✔ 3 (contexto, stores con runes, 1 conexión, limpieza) | — (mock) | ✔ |
-| `@angelitosystems/print-bridge-angular` | 0.1.0 | ✔ ng-packagr (APF, `fesm2022`) | ✔ 3 (DI compartida, signals, DestroyRef, plataforma servidor sin conexión) | — (mock) | ✔ (se publica `dist/`) |
+| `@angelitosystems/print-bridge-angular` | 0.1.1 | ✔ ng-packagr (APF, `fesm2022`) | ✔ 3 (DI compartida, signals, DestroyRef, plataforma servidor sin conexión) | — (mock) | ✔ (se publica `dist/`) |
 
 ## Ejemplos
 | Ejemplo | Compila | Probado en navegador |
@@ -57,7 +57,7 @@ Fecha: 2026-11-02. Fuente de verdad de lo **verificado**; "publicado" solo cuand
 - Release `sdk-2026.11.02`: publicados core 0.4.0, react/vue/svelte/angular 0.1.0 (log del workflow `publish-sdk`).
   Verificados instalando desde GitHub Packages en un proyecto limpio (`verify-packages.yml`): core, react, vue, svelte ✔;
   angular 0.1.0 ✔ cargando el compilador JIT como haría Angular. 0.1.0 no declara la peer `@angular/common`
-  (siempre presente en apps Angular) → corregido en 0.1.1, pendiente de publicar.
+  (siempre presente en apps Angular) → corregido en 0.1.1, publicado y verificado (release `sdk-2026.11.02.1`).
   `verify-packages.yml` permite volver a verificar paquetes publicados (solo lectura).
 
 ## Continuar

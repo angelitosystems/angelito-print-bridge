@@ -4,7 +4,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); e
 [Versionado Semántico](https://semver.org/lang/es/). Mientras sea 0.x, una versión menor puede romper compatibilidad.
 
 ## SDK — publicado (release sdk-2026.11.02)
-- `@angelitosystems/print-bridge-angular` 0.1.1 (sin publicar): declara `@angular/common` como peer dependency
+- `@angelitosystems/print-bridge-angular` 0.1.1 (publicado, release sdk-2026.11.02.1): declara `@angular/common` como peer dependency
   (0.1.0 lo importaba sin declararlo; lo detectó la verificación de instalación).
 - `@angelitosystems/print-bridge` 0.4.0: `PrintBridgeStore` compartido (suscripciones, una conexión por app) y
   **autorización en `sessionStorage` por defecto** (antes `localStorage`; use `localGrantStorage()` para persistir).
