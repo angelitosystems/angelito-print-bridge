@@ -1,0 +1,9 @@
+---
+// Copyright 2026 Angelito Systems S.A.C. · SPDX-License-Identifier: Apache-2.0
+import Site from "../layouts/Site.astro";
+import { softwareJsonLd } from "../lib/i18n";
+import Home from "../components/Home.astro";
+---
+<Site lang="es" path="" title="Angelito Print Bridge — Impresión local segura desde aplicaciones web" description="Puente open source para imprimir en silencio y de forma autorizada desde aplicaciones web en impresoras de Windows. PDF, imágenes y ESC/POS." jsonLd={softwareJsonLd}>
+  <Home lang="es" />
+</Site>

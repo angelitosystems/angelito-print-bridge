@@ -12,6 +12,8 @@ Ver `docs/IMPLEMENTATION_STATUS.md` (fuente de verdad de lo verificado). Decisio
 - `src/Angelito.PrintBridge.Agent` — ASP.NET Core/Kestrel en loopback (`AngelitoPrintBridge.exe`), API `/v1`, WebSocket, CLI admin.
 - `src/Angelito.PrintBridge.Desktop` — Avalonia 12 (MVVM, CommunityToolkit.Mvvm): bandeja + UI. Habla con el agente por la API admin (`/v1/admin`, token DPAPI). Inicia el agente si no corre.
 - Certificados de aplicación: `Core/Security/AppCertificates.cs` + `PairingService.PairWithCertificate`; guía `docs/CERTIFICATES.md`.
+- `packages/*` — SDK: `core` (protocolo + `PrintBridgeStore`), `react`, `vue`, `svelte`, `angular` (APF), `shared-testing` (agente simulado). Estado: `docs/SDK_IMPLEMENTATION_STATUS.md`.
+- `examples/*` — apps de ejemplo por framework (compilan en CI). `apps/website` — Astro/Starlight, desplegado por `pages.yml`.
 - `installer/` — `publish.ps1` (autocontenido) + `AngelitoPrintBridge.iss` (Inno Setup 6). Ver `docs/RELEASE.md`.
 - `tests/Angelito.PrintBridge.Tests` — xUnit (unit + integración HTTP/WS + componentes Windows reales).
 - `packages/core` — `@angelitosystems/print-bridge` (ESM, strict). Tests con `node --test` (Node ≥ 22.6 con type stripping).
@@ -22,7 +24,8 @@ dotnet build
 dotnet test
 dotnet format --verify-no-changes
 ./installer/publish.ps1                     # artifacts/win-x64/app
-cd packages/core && npm ci && npm run typecheck && npm test && npm run test:e2e   # e2e requiere dotnet build previo
+npm ci && npm run build && npm run typecheck && npm run lint && npm test   # JS (workspaces)
+cd packages/core && npm run test:e2e   # requiere dotnet build previo
 ```
 
 ## Reglas

@@ -1,0 +1,172 @@
+---
+// Copyright 2026 Angelito Systems S.A.C. · SPDX-License-Identifier: Apache-2.0
+import { href, base, t, type Lang } from "../lib/i18n";
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const s = t[lang];
+const es = lang === "es";
+
+const features = es
+  ? [
+      ["Impresión silenciosa autorizada", "Sin diálogos de Windows, solo para aplicaciones que el usuario aprobó."],
+      ["PDF, imágenes y RAW", "PDF con el motor de Windows, PNG/JPEG/BMP y comandos ESC/POS o ZPL."],
+      ["Cola persistente", "SQLite con recuperación tras reinicios y sin reimpresiones duplicadas."],
+      ["Seguro por diseño", "Solo loopback, validación de Origin y Host, emparejamiento y certificados."],
+      ["Icono de bandeja", "Minipanel, aprobación visual, impresoras, trabajos y certificados."],
+      ["Código abierto", "Apache 2.0, gratuito para proyectos personales y comerciales."],
+    ]
+  : [
+      ["Authorized silent printing", "No Windows dialogs, only for applications the user approved."],
+      ["PDF, images and RAW", "PDF via the Windows engine, PNG/JPEG/BMP and ESC/POS or ZPL commands."],
+      ["Persistent queue", "SQLite with restart recovery and no duplicate reprints."],
+      ["Secure by design", "Loopback only, Origin and Host validation, pairing and certificates."],
+      ["Tray icon", "Mini panel, visual approval, printers, jobs and certificates."],
+      ["Open source", "Apache 2.0, free for personal and commercial projects."],
+    ];
+
+const steps = es
+  ? ["Su web usa el SDK `@angelitosystems/print-bridge`.", "El SDK habla con el agente local en 127.0.0.1 (nunca por internet).", "El usuario aprueba su aplicación una vez (código o certificado).", "El agente envía el trabajo al spooler de Windows y reporta su estado."]
+  : ["Your web app uses the `@angelitosystems/print-bridge` SDK.", "The SDK talks to the local agent on 127.0.0.1 (never over the internet).", "The user approves your app once (code or certificate).", "The agent sends the job to the Windows spooler and reports its state."];
+
+const frameworks = [
+  ["JavaScript / TypeScript", "@angelitosystems/print-bridge", "javascript/sdk/", es ? "Publicado (0.3.0)" : "Published (0.3.0)"],
+  ["React + Vite", "@angelitosystems/print-bridge-react", "react/", es ? "En el repositorio · publicación pendiente" : "In the repository · not published yet"],
+  ["Next.js", "@angelitosystems/print-bridge-react", "nextjs/", es ? "En el repositorio · publicación pendiente" : "In the repository · not published yet"],
+  ["Angular", "@angelitosystems/print-bridge-angular", "angular/", es ? "En el repositorio · publicación pendiente" : "In the repository · not published yet"],
+  ["Svelte / SvelteKit", "@angelitosystems/print-bridge-svelte", "svelte/", es ? "En el repositorio · publicación pendiente" : "In the repository · not published yet"],
+  ["Vue / Nuxt", "@angelitosystems/print-bridge-vue", "vue/", es ? "En el repositorio · publicación pendiente" : "In the repository · not published yet"],
+];
+
+const formats = es
+  ? [["Disponible", "PDF · PNG · JPEG · BMP · RAW (ESC/POS, ZPL, EPL) · copias, orientación, papel y dúplex según el driver"], ["Experimental", "Impresión ARM64 (compilada, sin validar en hardware) · impresoras térmicas (sin pruebas físicas aún)"], ["Planificado", "HTML seguro · USB, HID, serie y TCP · Linux y macOS · actualizaciones automáticas firmadas"]]
+  : [["Available", "PDF · PNG · JPEG · BMP · RAW (ESC/POS, ZPL, EPL) · copies, orientation, paper and duplex as declared by the driver"], ["Experimental", "ARM64 builds (not validated on hardware) · thermal printers (no physical tests yet)"], ["Planned", "Safe HTML · USB, HID, serial and TCP · Linux and macOS · signed automatic updates"]];
+
+const modes = es
+  ? [["Emparejamiento con código", "El usuario confirma un código de 6 dígitos en el agente.", "Apps nuevas, sin backend"], ["Certificado de aplicación", "Su servidor firma con una clave privada; el equipo confía en el certificado.", "Flotas y kioscos, sin intervención"], ["Consola local", "Comandos `AngelitoPrintBridge.exe` para administración.", "Soporte e instalación masiva"]]
+  : [["Code pairing", "The user confirms a 6-digit code in the agent.", "New apps, no backend"], ["Application certificate", "Your server signs with a private key; the machine trusts the certificate.", "Fleets and kiosks, hands-free"], ["Local CLI", "`AngelitoPrintBridge.exe` commands for administration.", "Support and mass deployment"]];
+
+const faq = es
+  ? [
+      ["¿Necesito internet para imprimir?", "No. El agente funciona solo en el equipo y escucha únicamente en loopback."],
+      ["¿Cualquier sitio puede imprimir?", "No. Cada aplicación debe ser aprobada por el usuario (código) o por un certificado instalado por el administrador. Puede revocarse en cualquier momento."],
+      ["¿Por qué el navegador pide permiso de red local?", "Chrome y Edge protegen el acceso a localhost (Local Network Access). Es esperado y no se intenta eludir."],
+      ["¿Funciona con impresoras térmicas?", "El envío RAW está implementado y probado byte a byte con una impresora virtual. Aún no hay pruebas publicadas en hardware térmico físico."],
+      ["¿Es gratis para uso comercial?", "Sí. Apache License 2.0, sin activaciones ni funciones de pago."],
+      ["¿Cómo instalo el SDK?", "Desde GitHub Packages, que exige autenticarse con un token `read:packages` incluso para paquetes públicos."],
+    ]
+  : [
+      ["Do I need internet to print?", "No. The agent runs on the machine and listens on loopback only."],
+      ["Can any website print?", "No. Each app must be approved by the user (code) or by a certificate installed by an administrator, and can be revoked anytime."],
+      ["Why does the browser ask for local network permission?", "Chrome and Edge protect localhost access (Local Network Access). This is expected and never bypassed."],
+      ["Does it work with thermal printers?", "RAW printing is implemented and verified byte for byte with a virtual printer. There are no published tests on physical thermal hardware yet."],
+      ["Is it free for commercial use?", "Yes. Apache License 2.0, no activations or paid features."],
+      ["How do I install the SDK?", "From GitHub Packages, which requires a `read:packages` token even for public packages."],
+    ];
+
+const code = `import { createPrintBridge } from "@angelitosystems/print-bridge";
+
+const bridge = createPrintBridge({ appId: "com.miempresa.pos", appName: "Mi POS" });
+await bridge.connect();
+if (bridge.state === "unpaired") {
+  await bridge.pair({ permissions: ["printers:read", "print:document"], onCode: showCode });
+}
+const job = await bridge.print.pdf({ document: pdfBlob });
+await bridge.jobs.waitFor(job.jobId);`;
+
+
+---
+<section class="relative overflow-hidden">
+  <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_70%_10%,rgba(37,99,235,0.25),transparent),radial-gradient(40%_40%_at_10%_80%,rgba(56,189,248,0.18),transparent)]"></div>
+  <div class="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-20 md:grid-cols-2 md:py-28">
+    <div>
+      <p class="mb-4 inline-flex rounded-full border border-brand-500/30 px-3 py-1 text-xs font-medium text-brand-600 dark:text-brand-400">Open source · Apache 2.0 · Windows</p>
+      <h1 class="text-4xl font-bold tracking-tight md:text-6xl"><span class="gradient-text">{s.heroTitle}</span></h1>
+      <p class="mt-6 text-lg text-slate-600 dark:text-slate-300">{s.heroSubtitle}</p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a class="rounded-xl bg-brand-600 px-5 py-3 font-semibold text-white shadow-lg shadow-brand-600/25 hover:bg-brand-500" href={href(lang, "download/")}>{s.ctaDownload}</a>
+        <a class="rounded-xl border border-slate-300 px-5 py-3 font-semibold hover:border-brand-500 dark:border-white/20" href={href(lang, "getting-started/introduction/")}>{s.ctaStart}</a>
+        <a class="rounded-xl px-5 py-3 font-semibold text-slate-700 hover:text-brand-500 dark:text-slate-300" href="https://github.com/angelitosystems/angelito-print-bridge" rel="noopener">{s.ctaGithub} →</a>
+      </div>
+    </div>
+    <div class="relative mx-auto w-full max-w-sm">
+      <div class="absolute -inset-6 rounded-[2rem] bg-gradient-to-tr from-brand-600/30 to-sky-400/20 blur-2xl"></div>
+      <img src={`${base}images/logo.png`} alt="Angelito Print Bridge" width="512" height="512" class="relative rounded-3xl shadow-2xl" fetchpriority="high" />
+    </div>
+  </div>
+</section>
+
+<section class="mx-auto max-w-6xl px-4 py-16" aria-labelledby="features">
+  <h2 id="features" class="text-3xl font-bold">{es ? "Características principales" : "Key features"}</h2>
+  <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {features.map(([title, text]) => (
+      <div class="card p-6"><h3 class="font-semibold">{title}</h3><p class="mt-2 text-sm text-slate-600 dark:text-slate-400">{text}</p></div>
+    ))}
+  </div>
+</section>
+
+<section class="mx-auto max-w-6xl px-4 py-16" aria-labelledby="how">
+  <h2 id="how" class="text-3xl font-bold">{es ? "Cómo funciona" : "How it works"}</h2>
+  <ol class="mt-8 grid gap-4 md:grid-cols-4">
+    {steps.map((step, i) => (
+      <li class="card p-6"><span class="gradient-text text-3xl font-bold">{i + 1}</span><p class="mt-3 text-sm">{step}</p></li>
+    ))}
+  </ol>
+</section>
+
+<section class="mx-auto max-w-6xl px-4 py-16" aria-labelledby="fw">
+  <h2 id="fw" class="text-3xl font-bold">{es ? "Frameworks compatibles" : "Supported frameworks"}</h2>
+  <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {frameworks.map(([name, pkg, path, status]) => (
+      <a class="card block p-6 transition hover:border-brand-500" href={href(lang, path)}>
+        <h3 class="font-semibold">{name}</h3>
+        <p class="mt-1 font-mono text-xs text-slate-500">{pkg}</p>
+        <p class="mt-3 text-xs font-medium text-brand-600 dark:text-brand-400">{status}</p>
+      </a>
+    ))}
+  </div>
+</section>
+
+<section class="mx-auto grid max-w-6xl gap-8 px-4 py-16 md:grid-cols-2" aria-labelledby="secure">
+  <div>
+    <h2 id="secure" class="text-3xl font-bold">{es ? "Impresión silenciosa segura" : "Secure silent printing"}</h2>
+    <p class="mt-4 text-slate-600 dark:text-slate-300">{es
+      ? "Silenciosa no significa abierta: el agente solo escucha en este equipo, valida Origin y Host contra DNS rebinding, exige una sesión ligada al sitio y permisos separados para RAW. Toda autorización se puede revocar al instante y queda en la auditoría local."
+      : "Silent does not mean open: the agent listens on this machine only, validates Origin and Host against DNS rebinding, requires a session bound to the site and separate permissions for RAW. Every authorization can be revoked instantly and is recorded in the local audit log."}</p>
+    <a class="mt-4 inline-block text-brand-600 hover:underline dark:text-brand-400" href={href(lang, "security/")}>{es ? "Modelo de seguridad →" : "Security model →"}</a>
+  </div>
+  <pre class="card overflow-x-auto p-5 text-sm"><code>{code}</code></pre>
+</section>
+
+<section class="mx-auto max-w-6xl px-4 py-16" aria-labelledby="formats">
+  <h2 id="formats" class="text-3xl font-bold">{es ? "Formatos y estado" : "Formats and status"}</h2>
+  <dl class="mt-8 grid gap-4 md:grid-cols-3">
+    {formats.map(([label, text]) => (<div class="card p-6"><dt class="font-semibold">{label}</dt><dd class="mt-2 text-sm text-slate-600 dark:text-slate-400">{text}</dd></div>))}
+  </dl>
+</section>
+
+<section class="mx-auto max-w-6xl px-4 py-16" aria-labelledby="modes">
+  <h2 id="modes" class="text-3xl font-bold">{es ? "Modalidades de integración" : "Integration modes"}</h2>
+  <div class="mt-8 overflow-x-auto">
+    <table class="w-full text-left text-sm">
+      <thead><tr class="border-b border-slate-200 dark:border-white/10"><th class="py-3 pr-4">{es ? "Modalidad" : "Mode"}</th><th class="py-3 pr-4">{es ? "Cómo funciona" : "How it works"}</th><th class="py-3">{es ? "Ideal para" : "Best for"}</th></tr></thead>
+      <tbody>{modes.map(([m, how, best]) => (<tr class="border-b border-slate-100 dark:border-white/5"><td class="py-3 pr-4 font-medium">{m}</td><td class="py-3 pr-4">{how}</td><td class="py-3">{best}</td></tr>))}</tbody>
+    </table>
+  </div>
+</section>
+
+<section class="mx-auto max-w-6xl px-4 py-16" aria-labelledby="oss">
+  <div class="card flex flex-col items-start gap-4 p-8 md:flex-row md:items-center md:justify-between">
+    <div>
+      <h2 id="oss" class="text-2xl font-bold">{es ? "Código abierto y contribuciones" : "Open source and contributions"}</h2>
+      <p class="mt-2 text-slate-600 dark:text-slate-300">{es ? "Reporte problemas, proponga mejoras o envíe un pull request. Las vulnerabilidades se reportan de forma privada." : "Report issues, propose improvements or send a pull request. Vulnerabilities are reported privately."}</p>
+    </div>
+    <a class="rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-700 dark:bg-white dark:text-slate-900" href="https://github.com/angelitosystems/angelito-print-bridge/blob/main/CONTRIBUTING.md" rel="noopener">{es ? "Guía de contribución" : "Contributing guide"}</a>
+  </div>
+</section>
+
+<section class="mx-auto max-w-3xl px-4 py-16" aria-labelledby="faq">
+  <h2 id="faq" class="text-3xl font-bold">{es ? "Preguntas frecuentes" : "FAQ"}</h2>
+  <div class="mt-8 space-y-3">
+    {faq.map(([q, a]) => (<details class="card p-5"><summary class="cursor-pointer font-medium">{q}</summary><p class="mt-3 text-sm text-slate-600 dark:text-slate-400">{a}</p></details>))}
+  </div>
+</section>

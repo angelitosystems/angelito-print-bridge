@@ -33,6 +33,18 @@ Fecha: 2026-11-02. Fuente de verdad de lo **verificado**; "publicado" solo cuand
 | `examples/vanilla-typescript` | ✔ `vite build` | pendiente |
 | `examples/angular` | ✔ `ng build` (standalone, zoneless, signals) | pendiente |
 
+## Sitio web (`apps/website`)
+- Astro 7 + Starlight 0.42 + Tailwind v4; español en `/`, inglés en `/en/` (páginas clave traducidas; el resto muestra el
+  aviso de traducción pendiente de Starlight). Búsqueda Pagefind incluida en Starlight.
+- Landing, descargas (datos reales de GitHub Releases en cada build, con SHA-256), frameworks, ejemplos, laboratorio
+  (SDK real; conecta solo al pulsar), documentación por framework, API, seguridad y solución de problemas.
+- SEO: títulos y descripciones únicos, canonical, hreflang, Open Graph/Twitter, sitemap, JSON-LD SoftwareApplication.
+- Verificado localmente: `astro check` 0 errores, build de 37 páginas, verificador de enlaces internos sin rotos,
+  revisión visual (escritorio, móvil y modo oscuro).
+- Despliegue: `.github/workflows/pages.yml` (configure-pages, upload-pages-artifact, deploy-pages; entorno `github-pages`).
+- Dominio futuro `printbridge.angelitosystems.net`: definir `SITE_URL` y `BASE_PATH=/` en el workflow y configurar DNS (no hecho).
+- Pendiente: TypeDoc integrado, Lighthouse automatizado, traducción completa al inglés.
+
 ## Publicación
 - `publish-sdk.yml`: release `sdk-<etiqueta>` publicado por un mantenedor → publica cada paquete cuya versión no exista
   en GitHub Packages (core primero) tras build, tipos, lint, tests y E2E; luego instala y comprueba en un proyecto aparte.

@@ -1,0 +1,61 @@
+# Copyright 2026 Angelito Systems S.A.C.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Builds the website (Astro + Starlight) and deploys it to GitHub Pages. Runs on validated changes in main, on every
+# published release (so the download page shows the new version) and manually. Never runs for pull requests.
+name: pages
+
+on:
+  push:
+    branches: [main]
+    paths: ["apps/website/**", "packages/core/**", "package-lock.json", ".github/workflows/pages.yml"]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'angelitosystems/angelito-print-bridge'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - name: Build the SDK used by the playground
+        run: npm run build -w @angelitosystems/print-bridge
+      - uses: actions/configure-pages@v5
+      - name: Typecheck
+        run: npm run typecheck -w website
+      - name: Build and check internal links
+        env:
+          # Read-only access to the public Releases API (download page), avoids anonymous rate limits.
+          GITHUB_TOKEN: ${{ github.token }}
+        run: npm run build -w website
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: apps/website/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

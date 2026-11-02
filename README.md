@@ -9,6 +9,8 @@ Creado por **[Angelito Systems S.A.C.](https://angelitosystems.net)** · Licenci
 
 > Estado: **prototipo funcional** (v0.3.0): agente, SDK, app de bandeja y script de instalador. Ver [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md).
 
+Sitio y documentación: **https://angelitosystems.github.io/angelito-print-bridge/**
+
 ## Requisitos
 Windows 10 2004+ / 11 (x64), .NET SDK 10 para compilar, Node.js ≥ 22.6 para el SDK.
 

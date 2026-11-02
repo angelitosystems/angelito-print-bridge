@@ -1,0 +1,77 @@
+---
+// Copyright 2026 Angelito Systems S.A.C. · SPDX-License-Identifier: Apache-2.0
+import { href, base, type Lang } from "../lib/i18n";
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const es = lang === "es";
+const L = es
+  ? { title: "Laboratorio", intro: "Pruebe Angelito Print Bridge desde este navegador. Nada se conecta hasta que pulse «Detectar agente». Los documentos se envían directamente a su equipo; este sitio no los recibe ni almacena.", lna: "Chrome y Edge pedirán permiso de acceso a la red local: es necesario para hablar con el agente en 127.0.0.1.", detect: "Detectar agente", pair: "Autorizar este sitio", refresh: "Actualizar impresoras", print: "Imprimir PDF de prueba", jobs: "Trabajos", state: "Estado", missing: "No se encontró el agente en este equipo.", download: "Descargar Angelito Print Bridge", code: "Confirme este código en la app de bandeja:", printer: "Impresora", none: "Sin trabajos todavía." }
+  : { title: "Playground", intro: "Try Angelito Print Bridge from this browser. Nothing connects until you press “Detect agent”. Documents go straight to your computer; this site never receives or stores them.", lna: "Chrome and Edge will ask for local network access permission: it is required to talk to the agent on 127.0.0.1.", detect: "Detect agent", pair: "Authorize this site", refresh: "Refresh printers", print: "Print test PDF", jobs: "Jobs", state: "State", missing: "The agent was not found on this computer.", download: "Download Angelito Print Bridge", code: "Confirm this code in the tray app:", printer: "Printer", none: "No jobs yet." };
+---
+<section class="mx-auto max-w-4xl px-4 py-16" data-playground data-sample={`${base}sample.pdf`} data-l={JSON.stringify(L)}>
+  <h1 class="text-4xl font-bold">{L.title}</h1>
+  <p class="mt-3 text-slate-600 dark:text-slate-300">{L.intro}</p>
+  <p class="mt-2 text-sm text-slate-500">{L.lna}</p>
+
+  <div class="card mt-8 space-y-4 p-6">
+    <p>{L.state}: <strong data-state aria-live="polite">disconnected</strong></p>
+    <p data-error role="alert" class="text-red-600 dark:text-red-400" hidden></p>
+    <div data-missing hidden class="rounded-lg bg-amber-50 p-4 text-amber-900 dark:bg-amber-500/10 dark:text-amber-200">
+      {L.missing} <a class="font-semibold underline" href={href(lang, "download/")}>{L.download}</a>
+    </div>
+    <div class="flex flex-wrap gap-3">
+      <button data-detect class="rounded-lg bg-brand-600 px-4 py-2 font-medium text-white hover:bg-brand-500">{L.detect}</button>
+      <button data-pair hidden class="rounded-lg bg-brand-600 px-4 py-2 font-medium text-white hover:bg-brand-500">{L.pair}</button>
+    </div>
+    <p data-code hidden>{L.code} <strong data-code-value class="font-mono text-2xl tracking-widest"></strong></p>
+    <div data-ready hidden class="space-y-4">
+      <label class="block">{L.printer}
+        <select data-printers class="mt-1 block w-full rounded-lg border border-slate-300 bg-transparent p-2 dark:border-white/20"></select>
+      </label>
+      <div class="flex flex-wrap gap-3">
+        <button data-print class="rounded-lg bg-brand-600 px-4 py-2 font-medium text-white hover:bg-brand-500">{L.print}</button>
+        <button data-refresh class="rounded-lg border border-slate-300 px-4 py-2 dark:border-white/20">{L.refresh}</button>
+      </div>
+      <h2 class="font-semibold">{L.jobs}</h2>
+      <ul data-jobs class="space-y-1 text-sm"><li>{L.none}</li></ul>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { createPrintBridgeStore, jobList } from "@angelitosystems/print-bridge";
+
+  const root = document.querySelector<HTMLElement>("[data-playground]")!;
+  const L = JSON.parse(root.dataset.l!) as Record<string, string>;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  const store = createPrintBridgeStore({ appId: "net.angelitosystems.printbridge.playground", appName: "Angelito Print Bridge — Laboratorio" });
+
+  store.subscribe(() => {
+    const s = store.getSnapshot();
+    q("[data-state]").textContent = s.state;
+    const missing = s.error?.code === "agent_not_found";
+    q("[data-missing]").hidden = !missing;
+    q("[data-error]").hidden = !s.error || missing;
+    q("[data-error]").textContent = s.error ? `${s.error.code}: ${s.error.message}` : "";
+    q("[data-pair]").hidden = s.state !== "unpaired";
+    q("[data-code]").hidden = !s.pairingCode;
+    q("[data-code-value]").textContent = s.pairingCode ?? "";
+    q("[data-ready]").hidden = s.state !== "connected";
+    const select = q<HTMLSelectElement>("[data-printers]");
+    const current = select.value;
+    select.replaceChildren(...s.printers.map((p) => new Option(p.name + (p.isDefault ? " ★" : ""), p.id, false, current ? p.id === current : p.isDefault)));
+    q<HTMLButtonElement>("[data-print]").disabled = s.submitting > 0 || !s.printers.length;
+    const jobs = jobList(s);
+    q("[data-jobs]").replaceChildren(...(jobs.length
+      ? jobs.map((j) => Object.assign(document.createElement("li"), { textContent: `${j.kind} → ${j.printerId}: ${j.state}${j.error ? ` (${j.error.code})` : ""}` }))
+      : [Object.assign(document.createElement("li"), { textContent: L.none })]));
+  });
+
+  q("[data-detect]").addEventListener("click", () => void store.connect());
+  q("[data-pair]").addEventListener("click", () => void store.pair({ permissions: ["printers:read", "print:document"] }).catch(() => {}));
+  q("[data-refresh]").addEventListener("click", () => void store.refreshPrinters().catch(() => {}));
+  q("[data-print]").addEventListener("click", async () => {
+    const pdf = await (await fetch(root.dataset.sample!)).blob();
+    await store.printPdf({ printerId: q<HTMLSelectElement>("[data-printers]").value, document: pdf }).catch(() => {});
+  });
+</script>
