@@ -92,3 +92,29 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm publish
+
+  verify-install:
+    # Independent consumer project: installs the just-published version from GitHub Packages and imports it.
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          registry-url: https://npm.pkg.github.com
+          scope: '@angelitosystems'
+      - name: Install and import from GitHub Packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          VERSION="${TAG#sdk-v}"
+          mkdir consumer && cd consumer
+          npm init -y >/dev/null && npm pkg set type=module
+          for i in 1 2 3 4 5; do npm install "@angelitosystems/print-bridge@$VERSION" && break; sleep 20; done
+          node -e "import('@angelitosystems/print-bridge').then(m => { const b = m.createPrintBridge({ appId: 'com.example.verify' }); const t = m.escpos().init().cut().build(); if (b.state !== 'disconnected' || t.length !== 6) process.exit(1); console.log('OK', Object.keys(m).join(',')); })"
+          test -f node_modules/@angelitosystems/print-bridge/dist/index.d.ts
+          grep -q '"license": "Apache-2.0"' node_modules/@angelitosystems/print-bridge/package.json
