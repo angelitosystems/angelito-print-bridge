@@ -8,7 +8,7 @@ name: pages
 on:
   push:
     branches: [main]
-    paths: ["apps/website/**", "packages/core/**", "package-lock.json", ".github/workflows/pages.yml"]
+    paths: ["apps/website/**", "packages/**", "examples/**", "package-lock.json", ".github/workflows/pages.yml"]
   release:
     types: [published]
   workflow_dispatch:
@@ -36,16 +36,18 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
       - run: npm ci
-      - name: Build the SDK used by the playground
-        run: npm run build -w @angelitosystems/print-bridge
+      - name: Build the SDK packages (used by the playground and the examples)
+        run: |
+          npm run build -w @angelitosystems/print-bridge
+          npm run build -w @angelitosystems/print-bridge-react -w @angelitosystems/print-bridge-vue -w @angelitosystems/print-bridge-svelte -w @angelitosystems/print-bridge-angular
       - uses: actions/configure-pages@v5
       - name: Typecheck
         run: npm run typecheck -w website
-      - name: Build and check internal links
+      - name: Build site + examples (under /examples/<name>/) and check internal links
         env:
           # Read-only access to the public Releases API (download page), avoids anonymous rate limits.
           GITHUB_TOKEN: ${{ github.token }}
-        run: npm run build -w website
+        run: npm run build:pages -w website
       - uses: actions/upload-pages-artifact@v4
         with:
           path: apps/website/dist

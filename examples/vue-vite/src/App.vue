@@ -11,7 +11,7 @@ const chosen = ref("");
 const selected = computed(() => chosen.value || defaultPrinter.value?.id || "");
 
 async function printSample() {
-  const pdf = await (await fetch("/sample.pdf")).blob();
+  const pdf = await (await fetch(`${import.meta.env.BASE_URL}sample.pdf`)).blob();
   await printPdf({ printerId: selected.value, document: pdf }).catch(() => {});
 }
 </script>

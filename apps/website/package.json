@@ -8,7 +8,8 @@
     "dev": "astro dev",
     "build": "astro build && node scripts/check-links.mjs",
     "typecheck": "astro check",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "build:pages": "astro build && node scripts/build-examples.mjs && node scripts/check-links.mjs"
   },
   "dependencies": {
     "@angelitosystems/print-bridge": "*",

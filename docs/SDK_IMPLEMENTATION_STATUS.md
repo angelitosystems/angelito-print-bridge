@@ -47,6 +47,8 @@ Fecha: 2026-11-02. Fuente de verdad de lo **verificado**; "publicado" solo cuand
   canonical y hreflang correctos). El laboratorio público no pudo comprobarse contra el agente real desde el navegador
   integrado de pruebas: bloquea las peticiones de sitios públicos a localhost (`ERR_BLOCKED_BY_CLIENT`). Probar en Chrome/Edge
   aceptando el permiso de red local.
+- **Ejemplos publicados** en `/examples/<nombre>/` (los 7, compilados con su ruta base por `scripts/build-examples.mjs`).
+  Verificado con el build local: React, Angular, Next.js, Nuxt y Vue cargan sin errores; la demo Vue detectó el agente real.
 - Pendiente: TypeDoc integrado, Lighthouse automatizado, traducción completa al inglés.
 
 ## Publicación

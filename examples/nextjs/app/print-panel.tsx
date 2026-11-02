@@ -28,7 +28,7 @@ export function PrintPanel() {
           </select>{" "}
           <button
             disabled={!selected || isPrinting}
-            onClick={async () => printPdf({ printerId: selected, document: await (await fetch("/sample.pdf")).blob() }).catch(() => {})}
+            onClick={async () => printPdf({ printerId: selected, document: await (await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/sample.pdf`)).blob() }).catch(() => {})}
           >
             Imprimir PDF de prueba
           </button>

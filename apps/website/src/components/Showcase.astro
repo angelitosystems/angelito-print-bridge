@@ -1,7 +1,7 @@
 ---
 // Copyright 2026 Angelito Systems S.A.C. · SPDX-License-Identifier: Apache-2.0
 // Frameworks and examples listing (kind="frameworks" | "examples"), linked to real docs and repository folders.
-import { href, type Lang } from "../lib/i18n";
+import { href, base, type Lang } from "../lib/i18n";
 interface Props { lang: Lang; kind: "frameworks" | "examples" }
 const { lang, kind } = Astro.props;
 const es = lang === "es";
@@ -40,14 +40,18 @@ const examples = [
     <>
       <h1 class="text-4xl font-bold">{es ? "Ejemplos" : "Examples"}</h1>
       <p class="mt-3 max-w-3xl text-slate-600 dark:text-slate-300">{es
-        ? "Aplicaciones completas que compilan en la CI: detectan el agente, autorizan la aplicación, listan impresoras e imprimen un PDF de prueba."
-        : "Complete apps that build in CI: they detect the agent, authorize the app, list printers and print a test PDF."}</p>
+        ? "Aplicaciones completas publicadas aquí mismo: detectan el agente de su equipo, autorizan la aplicación, listan impresoras e imprimen un PDF de prueba. Cada demo solo conecta al pulsar «Conectar»."
+        : "Complete apps published right here: they detect the agent on your computer, authorize the app, list printers and print a test PDF. Each demo connects only when you press “Connect”."}</p>
       <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {examples.map(([dir, label]) => (
-          <a class="card block p-6 transition hover:border-brand-500" href={`${repo}examples/${dir}`} rel="noopener">
+          <div class="card p-6">
             <h2 class="font-semibold">{label}</h2>
             <p class="mt-1 font-mono text-xs text-slate-500">examples/{dir}</p>
-          </a>
+            <p class="mt-4 flex gap-4 text-sm">
+              <a class="font-medium text-brand-600 hover:underline dark:text-brand-400" href={`${base}examples/${dir}/`}>{es ? "Abrir demo" : "Open demo"}</a>
+              <a class="text-slate-600 hover:underline dark:text-slate-400" href={`${repo}examples/${dir}`} rel="noopener">{es ? "Código fuente" : "Source code"}</a>
+            </p>
+          </div>
         ))}
       </div>
       <p class="mt-8 text-sm"><a class="text-brand-600 hover:underline dark:text-brand-400" href={href(lang, "playground/")}>{es ? "Pruebe el laboratorio en el navegador →" : "Try the in-browser playground →"}</a></p>

@@ -1,5 +1,6 @@
 <!-- Copyright 2026 Angelito Systems S.A.C. · SPDX-License-Identifier: Apache-2.0 -->
 <script lang="ts">
+  import { asset } from "$app/paths";
   import { getPrintBridge } from "@angelitosystems/print-bridge-svelte";
 
   const { connectionState, pairingCode, error, printers, defaultPrinter, jobs, isPrinting, connect, pair, printPdf } = getPrintBridge();
@@ -7,7 +8,7 @@
   const selected = $derived(chosen || $defaultPrinter?.id || "");
 
   async function printSample() {
-    await printPdf({ printerId: selected, document: await (await fetch("/sample.pdf")).blob() }).catch(() => {});
+    await printPdf({ printerId: selected, document: await (await fetch(asset("/sample.pdf"))).blob() }).catch(() => {});
   }
 </script>
 

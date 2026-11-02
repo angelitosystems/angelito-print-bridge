@@ -5,4 +5,4 @@ import { sveltekit } from "@sveltejs/kit/vite";
 import { defineConfig } from "vite";
 
 // SvelteKit 3: configuration is passed to the Vite plugin (svelte.config.js is no longer read).
-export default defineConfig({ plugins: [sveltekit({ adapter: adapter() })] });
+export default defineConfig({ plugins: [sveltekit({ adapter: adapter(), paths: { base: (process.env.EXAMPLE_BASE ?? "/").replace(/\/$/, "") as "" | `/${string}` } })] });

@@ -27,6 +27,6 @@ store.subscribe(() => {
 $("connect").onclick = () => void store.connect();
 $("pair").onclick = () => void store.pair({ permissions: ["printers:read", "print:document"] }).catch(() => {});
 $("print").onclick = async () => {
-  const pdf = await (await fetch("/sample.pdf")).blob();
+  const pdf = await (await fetch(`${import.meta.env.BASE_URL}sample.pdf`)).blob();
   await store.printPdf({ printerId: $<HTMLSelectElement>("printers").value, document: pdf }).catch(() => {});
 };

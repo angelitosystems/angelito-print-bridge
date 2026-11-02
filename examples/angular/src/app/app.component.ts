@@ -46,7 +46,7 @@ export class AppComponent {
   }
 
   async printSample() {
-    const pdf = await (await fetch("/sample.pdf")).blob();
+    const pdf = await (await fetch(new URL("sample.pdf", document.baseURI))).blob();
     await this.jobs.printPdf({ printerId: this.selected(), document: pdf }).catch(() => {});
   }
 }

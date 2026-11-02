@@ -1,6 +1,7 @@
 <!-- Copyright 2026 Angelito Systems S.A.C. · SPDX-License-Identifier: Apache-2.0 -->
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import { useRuntimeConfig } from "#app";
 import { usePrint, usePrintBridge, usePrinters } from "@angelitosystems/print-bridge-vue";
 
 const { state, pairingCode, error, connect, pair } = usePrintBridge();
@@ -9,7 +10,7 @@ const { printPdf, isPrinting, lastJob } = usePrint();
 const chosen = ref("");
 const selected = computed(() => chosen.value || defaultPrinter.value?.id || "");
 async function printSample() {
-  await printPdf({ printerId: selected.value, document: await (await fetch("/sample.pdf")).blob() }).catch(() => {});
+  await printPdf({ printerId: selected.value, document: await (await fetch(`${useRuntimeConfig().app.baseURL}sample.pdf`)).blob() }).catch(() => {});
 }
 </script>
 
