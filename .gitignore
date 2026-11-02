@@ -21,3 +21,4 @@ packages/angular/dist/
 examples/angular/.angular/
 apps/website/dist/
 apps/website/.astro/
+examples/nextjs/out/
