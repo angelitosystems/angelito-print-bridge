@@ -9,7 +9,7 @@
     "build": "astro build && node scripts/check-links.mjs",
     "typecheck": "astro check",
     "preview": "astro preview",
-    "build:pages": "astro build && node scripts/build-examples.mjs && node scripts/check-links.mjs"
+    "build:pages": "astro build && node scripts/build-examples.mjs && node scripts/check-links.mjs --examples"
   },
   "dependencies": {
     "@angelitosystems/print-bridge": "*",

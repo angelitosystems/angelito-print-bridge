@@ -8,7 +8,7 @@
   const selected = $derived(chosen || $defaultPrinter?.id || "");
 
   async function printSample() {
-    await printPdf({ printerId: selected, document: await (await fetch(asset("/sample.pdf"))).blob() }).catch(() => {});
+    await printPdf({ printerId: selected, document: await (await fetch(asset("sample.pdf"))).blob() }).catch(() => {});
   }
 </script>
 

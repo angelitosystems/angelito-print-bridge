@@ -16,6 +16,8 @@ for (const file of files) {
   const html = readFileSync(file, "utf8");
   for (const [, url] of html.matchAll(/(?:href|src)="([^"#?]+)[^"]*"/g)) {
     if (/^(https?:|mailto:|data:|\/\/)/.test(url)) continue;
+    // Example demos are only present when built with `build:pages` (--examples flag); plain builds skip them.
+    if (!process.argv.includes("--examples") && new RegExp(`^${base}/examples/[^/]+/`).test(url)) continue;
     let path;
     if (url.startsWith("/")) {
       if (!url.startsWith(base + "/") && url !== base) { broken.push(`${file}: ${url} (outside base ${base})`); continue; }
