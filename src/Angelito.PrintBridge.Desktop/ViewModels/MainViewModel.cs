@@ -367,7 +367,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private Task StartAgent() => Run(async () =>
     {
-        if (!await AgentProcess.EnsureRunningAsync(_client)) throw new InvalidOperationException("No se pudo iniciar el agente. Reinstale el producto.");
+        if (await AgentProcess.EnsureRunningAsync(_client) is { } problem) throw new InvalidOperationException(problem);
     }, "Agente iniciado.");
 
     [RelayCommand]

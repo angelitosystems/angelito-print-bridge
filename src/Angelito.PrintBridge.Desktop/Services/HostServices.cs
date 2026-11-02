@@ -27,18 +27,32 @@ public static class AgentProcess
         return File.Exists(dev) ? dev : null;
     }
 
-    public static async Task<bool> EnsureRunningAsync(AgentClient client, CancellationToken ct = default)
+    /// <summary>Starts this user's agent if needed. Returns null on success, or a message explaining why not.</summary>
+    public static async Task<string?> EnsureRunningAsync(AgentClient client, CancellationToken ct = default)
     {
-        if (await client.IsAliveAsync(ct)) return true;
-        var exe = Locate();
-        if (exe is null) return false;
-        Process.Start(new ProcessStartInfo(exe) { UseShellExecute = false, CreateNoWindow = true, WorkingDirectory = Path.GetDirectoryName(exe)! });
-        for (var i = 0; i < 40 && !ct.IsCancellationRequested; i++)
+        if (!await client.IsAliveAsync(ct))
         {
-            await Task.Delay(250, ct);
-            if (await client.IsAliveAsync(ct)) return true;
+            var exe = Locate();
+            if (exe is null) return "No se encontró AngelitoPrintBridge.exe. Reinstale el producto.";
+            Process.Start(new ProcessStartInfo(exe) { UseShellExecute = false, CreateNoWindow = true, WorkingDirectory = Path.GetDirectoryName(exe)! });
+            var started = false;
+            for (var i = 0; i < 40 && !ct.IsCancellationRequested && !started; i++)
+            {
+                await Task.Delay(250, ct);
+                started = await client.IsAliveAsync(ct);
+            }
+            if (!started) return "El agente no respondió tras iniciarlo. Revise los registros.";
         }
-        return false;
+        // Answering on the port is not enough: it must be our agent (our admin token works).
+        try
+        {
+            await client.StatusAsync();
+            return null;
+        }
+        catch (AgentUnavailableException ex)
+        {
+            return ex.Message;
+        }
     }
 }
 

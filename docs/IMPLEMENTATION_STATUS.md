@@ -73,6 +73,14 @@ de Windows); «Salir» elimina el icono explícitamente.
 - Impresora predeterminada: implementada con `SetDefaultPrinterW`; **no se pulsó en esta máquina** para no cambiar tu configuración.
 - Pendiente de entrada real: clic derecho (menú) y doble clic, porque el usuario estaba usando la app durante la sesión.
 
+## Canal de eventos en tiempo real (sin publicar)
+- `GET /v1/admin/events` (WebSocket, token Admin, rechaza cualquier Origin): el agente avisa al instante de
+  solicitudes de emparejamiento y cambios de trabajos. La bandeja mantiene la conexión (reconexión con espera
+  creciente) y trae la ventana al frente ante una nueva solicitud; el sondeo queda como respaldo. Tests en `Phase2Tests`.
+- Comprobación de propiedad: si el puerto 41730 lo ocupa un agente que no acepta nuestro token (otra copia u otro
+  usuario de Windows), la bandeja lo dice en lugar de mostrar «Agente detenido» sin motivo.
+- Pendiente: verificar con la app instalada (requiere nueva versión del agente).
+
 ## Pendiente (siguientes fases, en orden)
 1. Compilar y probar el instalador (requiere Inno Setup 6) + firma Authenticode.
 2. Notificaciones nativas de Windows para solicitudes de emparejamiento.

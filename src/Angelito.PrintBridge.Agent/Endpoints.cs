@@ -276,6 +276,47 @@ public static class Endpoints
     private static int ActiveJobs(BridgeStore s) =>
         s.ListJobs(null, 500, JobState.Queued).Count + s.ListJobs(null, 500, JobState.Rendering).Count;
 
+    /// <summary>
+    /// Push channel for the desktop app (like QZ Tray's local socket): notifies pairing requests and job changes
+    /// instantly. Authenticated by the admin endpoint filter (Admin token header); pages can never reach it.
+    /// </summary>
+    private static async Task AdminEventsSocket(HttpContext ctx, PairingService pairing, JobService jobs)
+    {
+        if (!ctx.WebSockets.IsWebSocketRequest)
+        {
+            await HttpSecurity.Error(ctx, 400, "websocket_required", "Se requiere WebSocket.");
+            return;
+        }
+        using var ws = await ctx.WebSockets.AcceptWebSocketAsync();
+        var outbox = Channel.CreateBounded<string>(new BoundedChannelOptions(64) { FullMode = BoundedChannelFullMode.DropOldest });
+        void OnPairing() => outbox.Writer.TryWrite("pairing");
+        void OnJob(PrintJob _) => outbox.Writer.TryWrite("job");
+        pairing.Changed += OnPairing;
+        jobs.JobChanged += OnJob;
+        try
+        {
+            outbox.Writer.TryWrite("ready");
+            var sender = Task.Run(async () =>
+            {
+                await foreach (var type in outbox.Reader.ReadAllAsync(ctx.RequestAborted))
+                    await ws.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new { type }), WebSocketMessageType.Text, true, ctx.RequestAborted);
+            });
+            var buffer = new byte[256];
+            while (ws.State == WebSocketState.Open)
+                if ((await ws.ReceiveAsync(buffer, ctx.RequestAborted)).MessageType == WebSocketMessageType.Close) break;
+            outbox.Writer.TryComplete();
+            await sender.WaitAsync(TimeSpan.FromSeconds(2)).ContinueWith(_ => { });
+            if (ws.State is WebSocketState.Open or WebSocketState.CloseReceived)
+                await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "bye", CancellationToken.None);
+        }
+        catch (Exception ex) when (ex is OperationCanceledException or WebSocketException) { }
+        finally
+        {
+            pairing.Changed -= OnPairing;
+            jobs.JobChanged -= OnJob;
+        }
+    }
+
     private static void MapAdmin(RouteGroupBuilder admin)
     {
         admin.AddEndpointFilter(async (ic, next) =>
@@ -288,6 +329,7 @@ public static class Endpoints
             return await next(ic);
         });
 
+        admin.Map("/events", AdminEventsSocket);
         admin.MapGet("/pair-requests", (PairingService p) => p.Pending().Select(r => new
         {
             code = r.Code,

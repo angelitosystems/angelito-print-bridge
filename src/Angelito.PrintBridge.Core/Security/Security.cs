@@ -132,6 +132,14 @@ public sealed class PairingService(BridgeStore store, SessionService sessions, T
     private readonly ConcurrentDictionary<Guid, PairRequest> _requests = new();
     private readonly Lock _gate = new();
 
+    /// <summary>Raised after a pairing request is created, approved or denied (pushed to the desktop app).</summary>
+    public event Action? Changed;
+
+    private void RaiseChanged()
+    {
+        try { Changed?.Invoke(); } catch (Exception) { } // a failing listener must never break pairing
+    }
+
     public PairRequest Create(string appId, string appName, string origin, IReadOnlyList<string> permissions, string verifier)
     {
         if (!OriginPolicy.IsValidAppId(appId)) throw new PairingException("invalid_app_id", "appId inválido (ej. com.empresa.app).");
@@ -163,6 +171,7 @@ public sealed class PairingService(BridgeStore store, SessionService sessions, T
             };
             _requests[req.Id] = req;
             store.Audit("pair.requested", origin: origin, detail: $"app={appId} perms={string.Join(' ', perms)}");
+            RaiseChanged();
             return req;
         }
     }
@@ -188,6 +197,7 @@ public sealed class PairingService(BridgeStore store, SessionService sessions, T
             req.GrantToken = token;
             req.GrantId = grant.Id;
             store.Audit("pair.approved", grant.Id, grant.Origin, $"app={grant.AppId}");
+            RaiseChanged();
             return grant;
         }
     }
@@ -278,6 +288,7 @@ public sealed class PairingService(BridgeStore store, SessionService sessions, T
             if (req is null) return false;
             req.Status = PairStatus.Denied;
             store.Audit("pair.denied", origin: req.Origin, detail: $"app={req.AppId}");
+            RaiseChanged();
             return true;
         }
     }

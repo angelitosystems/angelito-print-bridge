@@ -35,6 +35,7 @@ public partial class App : Application
     private long _lastTrayClick;
     private DateTimeOffset _lastRestart = DateTimeOffset.MinValue;
     private bool _exiting;
+    private readonly CancellationTokenSource _exitToken = new();
 
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
@@ -50,7 +51,7 @@ public partial class App : Application
             ApplyTheme(settings.Theme);
             _client = new AgentClient(BridgeDefaults.ResolvePort(), dataDir);
             _vm = new MainViewModel(_client, settings);
-            _vm.PairingRequested += () => ShowMain(MainViewModel.TabHome);
+            _vm.PairingRequested += () => ShowMain(MainViewModel.TabHome, bringToFront: true);
             _vm.PropertyChanged += (_, e) =>
             {
                 if (e.PropertyName is nameof(MainViewModel.AgentOnline) or nameof(MainViewModel.AutoStartEnabled)) UpdateTrayMenu();
@@ -147,6 +148,7 @@ public partial class App : Application
     {
         await AgentProcess.EnsureRunningAsync(_client!);
         await _vm!.RefreshAsync();
+        _ = Task.Run(() => ListenToAgentAsync(_exitToken.Token));
         UpdateTrayMenu();
         _timer = new DispatcherTimer(ActiveInterval, DispatcherPriority.Background, async (_, _) => await TickAsync());
         _timer.Start();
@@ -160,10 +162,27 @@ public partial class App : Application
         if (!_vm.AgentOnline && DateTimeOffset.UtcNow - _lastRestart > TimeSpan.FromSeconds(10))
         {
             _lastRestart = DateTimeOffset.UtcNow;
-            if (await AgentProcess.EnsureRunningAsync(_client!)) await _vm.RefreshAsync();
+            if (await AgentProcess.EnsureRunningAsync(_client!) is null) await _vm.RefreshAsync();
         }
         // Poll slowly while nothing is on screen to keep idle CPU near zero.
         _timer!.Interval = _window!.IsVisible || _panel!.IsVisible ? ActiveInterval : IdleInterval;
+    }
+
+    /// <summary>Keeps the push channel to the agent open (reconnects with backoff); polling remains as a fallback.</summary>
+    private async Task ListenToAgentAsync(CancellationToken ct)
+    {
+        var delay = TimeSpan.FromSeconds(1);
+        while (!ct.IsCancellationRequested)
+        {
+            try
+            {
+                await _client!.ListenAsync(type => Dispatcher.UIThread.InvokeAsync(() => _vm!.RefreshAsync()), ct);
+                delay = TimeSpan.FromSeconds(1);
+            }
+            catch (Exception) when (!ct.IsCancellationRequested) { } // agent stopped/restarting: retry below
+            try { await Task.Delay(delay, ct); } catch (OperationCanceledException) { return; }
+            delay = TimeSpan.FromSeconds(Math.Min(15, delay.TotalSeconds * 2));
+        }
     }
 
     private void ListenForSecondInstance()
@@ -176,12 +195,20 @@ public partial class App : Application
         { IsBackground = true, Name = "single-instance" }.Start();
     }
 
-    private void ShowMain(int tab)
+    private void ShowMain(int tab) => ShowMain(tab, bringToFront: false);
+
+    private void ShowMain(int tab, bool bringToFront)
     {
         if (_window is null || _vm is null) return;
         _vm.SelectedTab = tab;
         _window.Show();
         if (_window.WindowState == WindowState.Minimized) _window.WindowState = WindowState.Normal;
+        if (bringToFront)
+        {
+            // A pairing request needs the user's attention now (like QZ Tray's prompt): briefly topmost to beat focus rules.
+            _window.Topmost = true;
+            _window.Topmost = false;
+        }
         _window.Activate();
     }
 
@@ -200,6 +227,7 @@ public partial class App : Application
         }
         catch (AgentUnavailableException) { } // already stopped
         _exiting = true;
+        _exitToken.Cancel();
         _timer?.Stop();
         _panel?.Close();
         if (_window is not null)

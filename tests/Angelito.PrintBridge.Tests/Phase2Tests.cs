@@ -5,6 +5,8 @@ using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Net.WebSockets;
+using System.Text;
 using System.Text.Json;
 using Angelito.PrintBridge.Agent;
 using Angelito.PrintBridge.Core.Abstractions;
@@ -65,6 +67,35 @@ public class AdminApiTests(AgentFactory factory) : IClassFixture<AgentFactory>
         {
             factory.Driver.Submit = (r, _) => { r.OnSpoolStarting(); return Task.CompletedTask; };
         }
+    }
+
+    [Fact]
+    public async Task Admin_event_socket_pushes_pairing_requests_instantly()
+    {
+        var token = factory.Services.GetRequiredKeyedService<string>("admin-token");
+        var client = factory.Server.CreateWebSocketClient();
+        client.ConfigureRequest = r => r.Headers.Authorization = $"Admin {token}";
+        using var ws = await client.ConnectAsync(new Uri(factory.Server.BaseAddress, "/v1/admin/events"), CancellationToken.None);
+        var buffer = new byte[256];
+        async Task<string> Next()
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            var r = await ws.ReceiveAsync(buffer, cts.Token);
+            return JsonDocument.Parse(buffer.AsMemory(0, r.Count)).RootElement.GetProperty("type").GetString()!;
+        }
+        Assert.Equal("ready", await Next());
+
+        var page = factory.CreateClient();
+        page.DefaultRequestHeaders.Add("Origin", "https://push.example.com");
+        await page.PostAsJsonAsync("/v1/pair/requests", new { appId = "com.example.push", appName = "Push", permissions = new[] { "printers:read" }, verifier = Angelito.PrintBridge.Core.Security.Tokens.New() });
+        Assert.Equal("pairing", await Next());
+    }
+
+    [Fact]
+    public async Task Admin_event_socket_rejects_missing_token()
+    {
+        var client = factory.Server.CreateWebSocketClient();
+        await Assert.ThrowsAnyAsync<Exception>(() => client.ConnectAsync(new Uri(factory.Server.BaseAddress, "/v1/admin/events"), CancellationToken.None));
     }
 
     [Fact]

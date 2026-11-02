@@ -23,7 +23,11 @@ public sealed record CertificateInfo(string Fingerprint, string Name, string Ori
 public sealed record GeneratedCertificate(CertificateInfo Certificate, string CertificatePem, string PrivateKeyPem);
 public sealed record AuditItem(long Id, DateTimeOffset At, string Event, string? GrantId, string? Origin, string? Detail);
 
-public sealed class AgentUnavailableException(string message) : Exception(message);
+public class AgentUnavailableException(string message) : Exception(message);
+
+/// <summary>Something answers on the agent port but it is not this user's agent (another copy or another Windows user).</summary>
+public sealed class AgentNotOwnedException(int port) : AgentUnavailableException(
+    $"El puerto {port} lo usa otra instancia de Angelito Print Bridge (otra copia o otro usuario de Windows). Ciérrela para usar esta.");
 
 /// <summary>Client for the agent's local admin API. Authenticates with the DPAPI-protected admin token.</summary>
 public sealed class AgentClient : IDisposable
@@ -78,7 +82,8 @@ public sealed class AgentClient : IDisposable
 
     private HttpRequestMessage Request(HttpMethod method, string path)
     {
-        if (!File.Exists(_tokenPath)) throw new AgentUnavailableException("El agente aún no se ha iniciado en esta cuenta.");
+        // Called only after the port answered: without our token, that agent belongs to someone else.
+        if (!File.Exists(_tokenPath)) throw new AgentNotOwnedException(Port);
         var req = new HttpRequestMessage(method, path);
         req.Headers.Authorization = new AuthenticationHeaderValue("Admin", AdminToken.Read(_tokenPath));
         return req;
@@ -115,11 +120,37 @@ public sealed class AgentClient : IDisposable
         }
         finally { req.Dispose(); }
         if (res.IsSuccessStatusCode) return res;
+        if (res.StatusCode == System.Net.HttpStatusCode.Unauthorized && req.RequestUri?.ToString().StartsWith("admin/") == true)
+        {
+            res.Dispose();
+            throw new AgentNotOwnedException(Port);
+        }
         var msg = await res.Content.ReadAsStringAsync();
         res.Dispose();
         try { msg = JsonDocument.Parse(msg).RootElement.GetProperty("error").GetProperty("message").GetString() ?? msg; }
         catch (Exception ex) when (ex is JsonException or KeyNotFoundException or InvalidOperationException) { }
         throw new InvalidOperationException(msg);
+    }
+
+    /// <summary>
+    /// Push channel from the agent (pairing requests, job changes). Returns when the connection closes; the caller
+    /// reconnects. Each event type ("ready", "pairing", "job") is passed to <paramref name="onEvent"/>.
+    /// </summary>
+    public async Task ListenAsync(Func<string, Task> onEvent, CancellationToken ct)
+    {
+        if (!File.Exists(_tokenPath)) throw new AgentNotOwnedException(Port);
+        using var ws = new System.Net.WebSockets.ClientWebSocket();
+        ws.Options.SetRequestHeader("Authorization", $"Admin {AdminToken.Read(_tokenPath)}");
+        ws.Options.KeepAliveInterval = TimeSpan.FromSeconds(20);
+        await ws.ConnectAsync(new Uri($"ws://127.0.0.1:{Port}/v1/admin/events"), ct);
+        var buffer = new byte[1024];
+        while (ws.State == System.Net.WebSockets.WebSocketState.Open && !ct.IsCancellationRequested)
+        {
+            var r = await ws.ReceiveAsync(buffer, ct);
+            if (r.MessageType == System.Net.WebSockets.WebSocketMessageType.Close) break;
+            var type = JsonDocument.Parse(buffer.AsMemory(0, r.Count)).RootElement.GetProperty("type").GetString();
+            if (type is not null) await onEvent(type);
+        }
     }
 
     public void Dispose() => _http.Dispose();
