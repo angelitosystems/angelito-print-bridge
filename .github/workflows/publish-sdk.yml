@@ -115,6 +115,6 @@ jobs:
           mkdir consumer && cd consumer
           npm init -y >/dev/null && npm pkg set type=module
           for i in 1 2 3 4 5; do npm install "@angelitosystems/print-bridge@$VERSION" && break; sleep 20; done
-          node -e "import('@angelitosystems/print-bridge').then(m => { const b = m.createPrintBridge({ appId: 'com.example.verify' }); const t = m.escpos().init().cut().build(); if (b.state !== 'disconnected' || t.length !== 6) process.exit(1); console.log('OK', Object.keys(m).join(',')); })"
+          node -e "import('@angelitosystems/print-bridge').then(m => { const b = m.createPrintBridge({ appId: 'com.example.verify' }); const t = m.escpos().init().cut().build(); if (b.state !== 'disconnected' || t.length !== 9) process.exit(1); console.log('OK', Object.keys(m).join(',')); })"
           test -f node_modules/@angelitosystems/print-bridge/dist/index.d.ts
           grep -q '"license": "Apache-2.0"' node_modules/@angelitosystems/print-bridge/package.json
