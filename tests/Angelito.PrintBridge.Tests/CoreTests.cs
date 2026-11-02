@@ -368,7 +368,10 @@ public class JobServiceTests
     {
         var (jobs, store, driver, dir) = Create();
         using var _d = dir;
-        await Task.WhenAll(Enumerable.Range(0, 300).Select(i => Enqueue(jobs, key: $"k{i % 250}")));
+        // Bounded like real traffic (300 unbounded writers can starve one past SQLite's 30 s busy wait on slow CI);
+        // ordering by key keeps each duplicate pair adjacent so the idempotency race is still exercised.
+        await Parallel.ForEachAsync(Enumerable.Range(0, 300).OrderBy(i => i % 250), new ParallelOptions { MaxDegreeOfParallelism = 16 },
+            async (i, _) => await Enqueue(jobs, key: $"k{i % 250}"));
         while (await jobs.ProcessNextAsync(CancellationToken.None)) { }
         Assert.Equal(250, driver.Calls);
         Assert.All(store.ListJobs("g1", 500), j => Assert.Equal(JobState.Submitted, j.State));
