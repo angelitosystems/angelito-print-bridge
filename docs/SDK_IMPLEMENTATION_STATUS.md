@@ -43,6 +43,10 @@ Fecha: 2026-11-02. Fuente de verdad de lo **verificado**; "publicado" solo cuand
   revisión visual (escritorio, móvil y modo oscuro).
 - Despliegue: `.github/workflows/pages.yml` (configure-pages, upload-pages-artifact, deploy-pages; entorno `github-pages`).
 - Dominio futuro `printbridge.angelitosystems.net`: definir `SITE_URL` y `BASE_PATH=/` en el workflow y configurar DNS (no hecho).
+- **Desplegado y verificado**: https://angelitosystems.github.io/angelito-print-bridge/ (24 rutas y recursos con 200,
+  canonical y hreflang correctos). El laboratorio público no pudo comprobarse contra el agente real desde el navegador
+  integrado de pruebas: bloquea las peticiones de sitios públicos a localhost (`ERR_BLOCKED_BY_CLIENT`). Probar en Chrome/Edge
+  aceptando el permiso de red local.
 - Pendiente: TypeDoc integrado, Lighthouse automatizado, traducción completa al inglés.
 
 ## Publicación
