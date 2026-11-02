@@ -34,7 +34,7 @@ Semantic Versioning: PATCH = correcciones, MINOR = funciones compatibles, MAJOR 
 | Componente | Versión en | Tag del release | Workflow | Destino |
 |---|---|---|---|---|
 | Agente Windows + app de bandeja + instaladores | `Directory.Build.props` | `agent-vX.Y.Z` | `release-agent.yml` | adjuntos del GitHub Release |
-| SDK `@angelitosystems/print-bridge` | `sdk/typescript/package.json` | `sdk-vX.Y.Z` | `publish-sdk.yml` | GitHub Packages (npm) |
+| SDK `@angelitosystems/print-bridge` | `packages/core/package.json` | `sdk-vX.Y.Z` | `publish-sdk.yml` | GitHub Packages (npm) |
 
 Flujo: subir la versión en el archivo correspondiente → merge a `main` (CI verde) → crear un GitHub Release con el tag.
 Los workflows verifican que el tag coincida con la versión, que el commit esté en `main`, ejecutan todas las pruebas
@@ -43,7 +43,7 @@ Publicar requiere solo `GITHUB_TOKEN` (`packages: write` únicamente en `publish
 permisos de escritura ni usan `pull_request_target`.
 
 ## Releases reproducibles
-- Versionado semántico; la versión vive en `Directory.Build.props` y `sdk/typescript/package.json`.
+- Versionado semántico; la versión vive en `Directory.Build.props` y `packages/core/package.json`.
 - Builds deterministas (`Deterministic`, `ContinuousIntegrationBuild` en CI) y dependencias bloqueadas (`packages.lock.json`, `package-lock.json`).
 - `release-agent.yml` (al publicar un release `agent-vX.Y.Z`) compila, prueba y adjunta zips portables, instaladores y `SHA256SUMS.txt`.
 - La carpeta publicada incluye LICENSE, NOTICE, THIRD-PARTY-NOTICES.md y TRADEMARKS.md.

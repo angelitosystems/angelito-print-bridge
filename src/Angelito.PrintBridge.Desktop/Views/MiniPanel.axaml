@@ -23,7 +23,7 @@
       <Border Classes="accentline" Margin="16,0" CornerRadius="0,0,3,3" />
       <!-- Header -->
       <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,14,16,10">
-        <Image Source="/Assets/icon.png" Width="32" Height="32" VerticalAlignment="Center" />
+        <Border Width="34" Height="34" CornerRadius="8" ClipToBounds="True" VerticalAlignment="Center"><Image Source="/Assets/icon.png" Width="34" Height="34" /></Border>
         <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
           <TextBlock Text="Angelito Print Bridge" FontWeight="SemiBold" FontSize="14" />
           <StackPanel Orientation="Horizontal" Spacing="6">

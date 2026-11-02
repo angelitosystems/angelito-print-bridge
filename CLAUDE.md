@@ -14,7 +14,7 @@ Ver `docs/IMPLEMENTATION_STATUS.md` (fuente de verdad de lo verificado). Decisio
 - Certificados de aplicación: `Core/Security/AppCertificates.cs` + `PairingService.PairWithCertificate`; guía `docs/CERTIFICATES.md`.
 - `installer/` — `publish.ps1` (autocontenido) + `AngelitoPrintBridge.iss` (Inno Setup 6). Ver `docs/RELEASE.md`.
 - `tests/Angelito.PrintBridge.Tests` — xUnit (unit + integración HTTP/WS + componentes Windows reales).
-- `sdk/typescript` — `@angelitosystems/print-bridge` (ESM, strict). Tests con `node --test` (Node ≥ 22.6 con type stripping).
+- `packages/core` — `@angelitosystems/print-bridge` (ESM, strict). Tests con `node --test` (Node ≥ 22.6 con type stripping).
 
 ## Comandos
 ```bash
@@ -22,7 +22,7 @@ dotnet build
 dotnet test
 dotnet format --verify-no-changes
 ./installer/publish.ps1                     # artifacts/win-x64/app
-cd sdk/typescript && npm ci && npm run typecheck && npm test && npm run test:e2e   # e2e requiere dotnet build previo
+cd packages/core && npm ci && npm run typecheck && npm test && npm run test:e2e   # e2e requiere dotnet build previo
 ```
 
 ## Reglas

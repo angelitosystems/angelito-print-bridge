@@ -3,7 +3,14 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); el proyecto sigue
 [Versionado Semántico](https://semver.org/lang/es/). Mientras sea 0.x, una versión menor puede romper compatibilidad.
 
-## [0.3.0] — sin publicar
+## SDK — sin publicar
+- `@angelitosystems/print-bridge` 0.4.0: `PrintBridgeStore` compartido (suscripciones, una conexión por app) y
+  **autorización en `sessionStorage` por defecto** (antes `localStorage`; use `localGrantStorage()` para persistir).
+- `@angelitosystems/print-bridge-react` 0.1.0: `PrintBridgeProvider` y hooks (`usePrintBridgeConnection`, `usePrinters`,
+  `usePrinter`, `usePrintJob`, `usePrintQueue`, `usePrint`). Compatible con Next.js App Router (`"use client"`).
+- Logotipo oficial como icono de la app, bandeja e instalador.
+
+## [0.3.0] — publicado (agent-v0.3.0, sdk-v0.3.0)
 ### Añadido (actualización)
 - **Certificados de aplicación**: generar (RSA-2048) o importar (RSA/ECDSA) un certificado ligado a un origen y permisos;
   el backend del sitio firma y el SDK se empareja sin aprobación manual (`certificate` en `createPrintBridge`).

@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/assets/logo.png" alt="Angelito Print Bridge" width="220"></p>
+
 # Angelito Print Bridge
 
 Puente local, libre y gratuito, que permite a aplicaciones web **autorizadas** imprimir en silencio
@@ -52,7 +54,7 @@ const job = await bridge.print.pdf({ printerId: printers[0].id, document: pdfBlo
 await bridge.jobs.waitFor(job.jobId);
 ```
 Instalación desde GitHub Packages (requiere autenticarse, ver la guía): `npm install @angelitosystems/print-bridge`.
-Guía completa: [sdk/typescript/README.md](sdk/typescript/README.md).
+Guía completa: [packages/core/README.md](packages/core/README.md).
 
 ## Documentación
 - [Arquitectura y decisiones](docs/ARCHITECTURE.md)
@@ -64,7 +66,7 @@ Guía completa: [sdk/typescript/README.md](sdk/typescript/README.md).
 ## Pruebas
 ```bash
 dotnet test
-cd sdk/typescript && npm ci && npm test && npm run test:e2e
+cd packages/core && npm ci && npm test && npm run test:e2e
 ```
 Las pruebas nunca imprimen en papel: usan la impresora `virtual:file` o salida a archivo con `APB_TEST_PRINTER` explícito.
 

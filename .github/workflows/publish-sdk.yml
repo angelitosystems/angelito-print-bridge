@@ -1,8 +1,10 @@
 # Copyright 2026 Angelito Systems S.A.C.
 # SPDX-License-Identifier: Apache-2.0
 #
-# Publishes @angelitosystems/print-bridge to GitHub Packages when a stable GitHub Release tagged `sdk-vX.Y.Z` is
-# published. Uses only the automatic GITHUB_TOKEN (no npm tokens, no PATs, no npmjs.com).
+# Publishes the SDK packages (@angelitosystems/print-bridge and its framework integrations) to GitHub Packages when a
+# maintainer publishes a stable GitHub Release tagged `sdk-<label>` (the explicit authorization).
+# Each package is published only if its package.json version is not in the registry yet, so unchanged packages and
+# duplicate versions are skipped. Uses only the automatic GITHUB_TOKEN (no npm tokens, no PATs, no npmjs.com).
 name: publish-sdk
 
 on:
@@ -19,16 +21,14 @@ concurrency:
 
 jobs:
   publish:
-    # Stable SDK releases of the official repository only (never forks, never prereleases, never agent tags).
     if: >-
       github.repository == 'angelitosystems/angelito-print-bridge' &&
-      startsWith(github.event.release.tag_name, 'sdk-v') &&
+      startsWith(github.event.release.tag_name, 'sdk-') &&
       !github.event.release.prerelease && !github.event.release.draft
     runs-on: windows-latest
     environment: github-packages
-    defaults:
-      run:
-        working-directory: sdk/typescript
+    outputs:
+      published: ${{ steps.publish.outputs.published }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -52,49 +52,55 @@ jobs:
           registry-url: https://npm.pkg.github.com
           scope: '@angelitosystems'
           cache: npm
-          cache-dependency-path: sdk/typescript/package-lock.json
+          cache-dependency-path: package-lock.json
 
-      - name: Version must match tag
-        shell: bash
-        env:
-          TAG: ${{ github.event.release.tag_name }}
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          [ "sdk-v$VERSION" = "$TAG" ] || { echo "::error::package.json $VERSION does not match tag $TAG"; exit 1; }
-          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
-
-      - name: Version must not be published yet
+      - name: Select packages whose version is not published yet
+        id: select
         shell: bash
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if npm view "@angelitosystems/print-bridge@$VERSION" version >/dev/null 2>&1; then
-            echo "::error::@angelitosystems/print-bridge@$VERSION already exists"; exit 1
-          fi
+          TODO=""
+          for dir in packages/*/; do
+            dir="${dir%/}"
+            [ "$(node -p "!!require('./$dir/package.json').private")" = "true" ] && continue
+            spec=$(node -p "const p=require('./$dir/package.json'); p.name+'@'+p.version")
+            if npm view "$spec" version >/dev/null 2>&1; then echo "skip $spec (already published)"; else echo "will publish $spec"; TODO="$TODO $dir"; fi
+          done
+          [ -n "$TODO" ] || { echo "::error::No package has an unpublished version. Bump versions before releasing."; exit 1; }
+          echo "dirs=$TODO" >> "$GITHUB_OUTPUT"
 
       - run: npm ci
+      - run: npm run build
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
 
-      - name: End-to-end against the real Windows agent
-        working-directory: .
+      - name: Build the Windows agent for E2E
         run: dotnet build src/Angelito.PrintBridge.Agent -c Release
-      - name: Run E2E
+      - name: E2E against the real agent
+        working-directory: packages/core
         env:
           APB_AGENT_EXE: ${{ github.workspace }}/src/Angelito.PrintBridge.Agent/bin/Release/net10.0-windows10.0.19041.0/AngelitoPrintBridge.exe
         run: npm run test:e2e
 
-      - name: Package contents
-        run: npm pack --dry-run
-
-      - name: Publish to GitHub Packages
+      - name: Publish to GitHub Packages (core first)
+        id: publish
+        shell: bash
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm publish
+          DIRS: ${{ steps.select.outputs.dirs }}
+        run: |
+          ORDERED=$(for d in $DIRS; do [ "$d" = "packages/core" ] && echo "0 $d" || echo "1 $d"; done | sort | cut -d' ' -f2)
+          SPECS=""
+          for dir in $ORDERED; do
+            (cd "$dir" && npm pack --dry-run && npm publish)
+            SPECS="$SPECS,$(node -p "const p=require('./$dir/package.json'); p.name+'@'+p.version")"
+          done
+          echo "published=${SPECS#,}" >> "$GITHUB_OUTPUT"
 
   verify-install:
-    # Independent consumer project: installs the just-published version from GitHub Packages and imports it.
+    # Independent consumer project: installs every just-published version from GitHub Packages and imports it.
     needs: publish
     runs-on: ubuntu-latest
     permissions:
@@ -109,12 +115,16 @@ jobs:
       - name: Install and import from GitHub Packages
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ github.event.release.tag_name }}
+          PUBLISHED: ${{ needs.publish.outputs.published }}
         run: |
-          VERSION="${TAG#sdk-v}"
           mkdir consumer && cd consumer
           npm init -y >/dev/null && npm pkg set type=module
-          for i in 1 2 3 4 5; do npm install "@angelitosystems/print-bridge@$VERSION" && break; sleep 20; done
-          node -e "import('@angelitosystems/print-bridge').then(m => { const b = m.createPrintBridge({ appId: 'com.example.verify' }); const t = m.escpos().init().cut().build(); if (b.state !== 'disconnected' || t.length !== 9) process.exit(1); console.log('OK', Object.keys(m).join(',')); })"
-          test -f node_modules/@angelitosystems/print-bridge/dist/index.d.ts
-          grep -q '"license": "Apache-2.0"' node_modules/@angelitosystems/print-bridge/package.json
+          SPECS=$(echo "$PUBLISHED" | tr ',' ' ')
+          # Peer dependencies a real app would already have.
+          EXTRA="@angelitosystems/print-bridge react@19"
+          for i in 1 2 3 4 5; do npm install $SPECS $EXTRA && break; sleep 20; done
+          for spec in $SPECS; do
+            name="${spec%@*}"
+            node -e "import('$name').then(m => { if (!Object.keys(m).length) process.exit(1); console.log('OK $spec', Object.keys(m).join(',')); })"
+            grep -q '"license": "Apache-2.0"' "node_modules/$name/package.json"
+          done

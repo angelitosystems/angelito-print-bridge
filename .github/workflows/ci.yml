@@ -26,7 +26,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: sdk/typescript/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Format
         run: dotnet format --verify-no-changes
@@ -41,21 +41,21 @@ jobs:
           $out
           if ($out -match "has the following vulnerable packages") { exit 1 }
 
-      - name: SDK install
-        working-directory: sdk/typescript
+      - name: JS install (workspaces)
         run: npm ci
-      - name: SDK typecheck, test, build
-        working-directory: sdk/typescript
+      - name: JS build (packages, then examples)
+        run: npm run build
+      - name: JS typecheck, lint, test
         run: |
           npm run typecheck
           npm run lint
           npm test
-          npm pack --dry-run
-      - name: SDK audit
-        working-directory: sdk/typescript
+      - name: Package contents (publishable packages)
+        run: npm pack --dry-run --workspace packages/core --workspace packages/react
+      - name: JS audit
         run: npm audit --audit-level=high
       - name: E2E (agent + SDK, virtual printer)
-        working-directory: sdk/typescript
+        working-directory: packages/core
         env:
           APB_AGENT_EXE: ${{ github.workspace }}/src/Angelito.PrintBridge.Agent/bin/Release/net10.0-windows10.0.19041.0/AngelitoPrintBridge.exe
         run: npm run test:e2e

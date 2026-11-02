@@ -1,6 +1,6 @@
 {
   "name": "@angelitosystems/print-bridge",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "SDK oficial de Angelito Print Bridge (creado por Angelito Systems S.A.C.): impresión silenciosa autorizada desde aplicaciones web.",
   "license": "Apache-2.0",
   "author": {
@@ -10,13 +10,21 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/angelitosystems/angelito-print-bridge.git",
-    "directory": "sdk/typescript"
+    "directory": "packages/core"
   },
-  "homepage": "https://github.com/angelitosystems/angelito-print-bridge/tree/main/sdk/typescript#readme",
+  "homepage": "https://github.com/angelitosystems/angelito-print-bridge/tree/main/packages/core#readme",
   "bugs": {
     "url": "https://github.com/angelitosystems/angelito-print-bridge/issues"
   },
-  "keywords": ["printing", "silent-printing", "escpos", "pdf", "windows", "print-bridge", "angelito-systems"],
+  "keywords": [
+    "printing",
+    "silent-printing",
+    "escpos",
+    "pdf",
+    "windows",
+    "print-bridge",
+    "angelito-systems"
+  ],
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -28,8 +36,15 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "README.md", "LICENSE", "NOTICE"],
-  "engines": { "node": ">=20" },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
@@ -42,6 +57,7 @@
     "prepack": "node -e \"for (const f of ['LICENSE','NOTICE']) require('fs').copyFileSync('../../'+f, f)\" && npm run build"
   },
   "devDependencies": {
+    "@angelitosystems/print-bridge-shared-testing": "*",
     "typescript": "^5.9.3"
   }
 }

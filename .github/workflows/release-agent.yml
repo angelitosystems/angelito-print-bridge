@@ -60,12 +60,15 @@ jobs:
       - name: Test (.NET)
         run: dotnet test -c Release
 
+      - name: JS install and build (workspaces)
+        run: |
+          npm ci
+          npm run build -w @angelitosystems/print-bridge
       - name: Test (SDK E2E against this build)
-        working-directory: sdk/typescript
+        working-directory: packages/core
         env:
           APB_AGENT_EXE: ${{ github.workspace }}/src/Angelito.PrintBridge.Agent/bin/Release/net10.0-windows10.0.19041.0/AngelitoPrintBridge.exe
         run: |
-          npm ci
           npm test
           npm run test:e2e
 

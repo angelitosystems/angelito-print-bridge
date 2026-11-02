@@ -13,7 +13,7 @@ No aporte código copiado de proyectos con licencias incompatibles ni de QZ Tray
 dotnet build
 dotnet test
 dotnet format --verify-no-changes
-cd sdk/typescript && npm ci && npm run typecheck && npm test && npm run test:e2e
+cd packages/core && npm ci && npm run typecheck && npm test && npm run test:e2e
 ```
 - Los tests **nunca** deben imprimir en papel ni auto-seleccionar impresoras instaladas: use la impresora `virtual:file`.
 - Todo cambio en seguridad (Origin, Host, CORS, emparejamiento, permisos) necesita un test que lo cubra.

@@ -6,7 +6,7 @@ Fecha: 2026-11-02 · Versión: 0.3.0 · **Prototipo open source (Apache-2.0) —
 | Suite | Comando | Resultado |
 |---|---|---|
 | .NET (unit + integración HTTP/WS + Windows reales + UI/VM) | `dotnet test` | 70/70 ✔ |
-| SDK unit | `cd sdk/typescript && npm test` | 9/9 ✔ |
+| SDK unit | `cd packages/core && npm test` | 9/9 ✔ |
 | E2E (agente real + SQLite + motor PDF + CLI) | `npm run test:e2e` | 8/8 ✔ (re-ejecutado en 0.3.0) |
 | Formato | `dotnet format --verify-no-changes`, `tsc --noEmit` strict | ✔ |
 

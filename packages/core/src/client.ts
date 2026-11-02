@@ -25,20 +25,38 @@ const DEFAULT_PORTS = [41730, 41731, 41732];
 const PRODUCT = "Angelito Print Bridge";
 const TERMINAL: ReadonlySet<JobState> = new Set(["completed", "failed", "cancelled", "unknown"]);
 
-function memoryStorage(): GrantStorage {
+/** Grant kept only in memory (lost on reload). */
+export function memoryStorage(): GrantStorage {
   const m = new Map<string, string>();
   return { get: (k) => m.get(k) ?? null, set: (k, v) => void m.set(k, v), remove: (k) => void m.delete(k) };
 }
 
-function defaultStorage(): GrantStorage {
+function webStorage(kind: "localStorage" | "sessionStorage"): GrantStorage | null {
   try {
-    // Browsers only: Node 22+ exposes an experimental localStorage that warns on access.
-    const ls = typeof document !== "undefined" ? globalThis.localStorage : undefined;
-    if (ls) return { get: (k) => ls.getItem(k), set: (k, v) => ls.setItem(k, v), remove: (k) => ls.removeItem(k) };
+    // Browsers only (Node 22+ exposes an experimental localStorage that warns on access); can throw in sandboxed iframes.
+    const s = typeof document !== "undefined" ? globalThis[kind] : undefined;
+    if (s) return { get: (k) => s.getItem(k), set: (k, v) => s.setItem(k, v), remove: (k) => s.removeItem(k) };
   } catch {
-    // localStorage can throw in sandboxed iframes / privacy modes
+    // storage blocked by privacy settings
   }
-  return memoryStorage();
+  return null;
+}
+
+/** Default: per-tab `sessionStorage` (survives reloads, cleared when the tab closes). */
+export function sessionGrantStorage(): GrantStorage {
+  return webStorage("sessionStorage") ?? memoryStorage();
+}
+
+/**
+ * Opt-in: persistent `localStorage`, so the user does not re-pair on every visit. Any script running on your origin
+ * (e.g. an XSS) could read it; the grant only works from your origin and can be revoked in the agent.
+ */
+export function localGrantStorage(): GrantStorage {
+  return webStorage("localStorage") ?? memoryStorage();
+}
+
+function defaultStorage(): GrantStorage {
+  return sessionGrantStorage();
 }
 
 function randomVerifier(): string {

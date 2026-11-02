@@ -27,8 +27,8 @@
         <DockPanel>
           <StackPanel DockPanel.Dock="Top" Margin="22,22,22,18" Spacing="14">
             <StackPanel Orientation="Horizontal" Spacing="12">
-              <Border Width="40" Height="40" CornerRadius="12" Background="{StaticResource AccentGradient}" BoxShadow="0 0 18 0 #667C3AED">
-                <PathIcon Data="{StaticResource IconPrinter}" Width="22" Height="22" Foreground="White" />
+              <Border Width="44" Height="44" CornerRadius="12" ClipToBounds="True" BoxShadow="0 0 18 0 #662563EB">
+                <Image Source="/Assets/icon.png" Width="44" Height="44" />
               </Border>
               <StackPanel VerticalAlignment="Center">
                 <TextBlock Text="Angelito" FontSize="13" Foreground="{StaticResource NavMutedBrush}" />
@@ -438,7 +438,9 @@
             <TextBlock Classes="h1" Text="Acerca de" />
             <Border Classes="card">
               <Grid ColumnDefinitions="Auto,*">
-                <Image Source="/Assets/icon.png" Width="56" Height="56" VerticalAlignment="Top" />
+                <Border Width="128" Height="128" CornerRadius="16" ClipToBounds="True" VerticalAlignment="Top">
+                  <Image Source="/Assets/logo.png" Width="128" Height="128" AutomationProperties.Name="Logotipo de Angelito Print Bridge" />
+                </Border>
                 <StackPanel Grid.Column="1" Margin="16,0,0,0" Spacing="4">
                   <TextBlock Classes="h2" Text="Angelito Print Bridge" />
                   <TextBlock Text="{Binding Source={x:Static vm:MainViewModel.ProductVersion}, StringFormat='Versión {0}', Mode=OneTime}" />

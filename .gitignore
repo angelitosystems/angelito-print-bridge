@@ -7,6 +7,9 @@ dist/
 TestResults/
 *.token
 artifacts/
-sdk/typescript/LICENSE
-sdk/typescript/NOTICE
+packages/*/LICENSE
+packages/*/NOTICE
 *.tgz
+.next/
+next-env.d.ts
+*.tsbuildinfo
