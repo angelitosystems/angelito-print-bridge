@@ -69,19 +69,43 @@ Root: HKA; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: s
 Filename: "{app}\AngelitoPrintBridge.Desktop.exe"; Description: "Abrir Angelito Print Bridge"; Flags: nowait postinstall skipifsilent
 
 [UninstallRun]
+Filename: "{sys}\taskkill.exe"; Parameters: "/F /IM AngelitoPrintBridge.Desktop.exe"; Flags: runhidden waituntilterminated; RunOnceId: "StopDesktop"
 Filename: "{app}\AngelitoPrintBridge.exe"; Parameters: "shutdown"; Flags: runhidden waituntilterminated; RunOnceId: "StopAgent"
-Filename: "{sys}\taskkill.exe"; Parameters: "/IM AngelitoPrintBridge.Desktop.exe"; Flags: runhidden waituntilterminated; RunOnceId: "StopDesktop"
 
 [Code]
-// Antes de actualizar: detiene el agente solo si no hay trabajos en proceso (código 4 = trabajos activos).
+function ProcessRunning(ExeName: String): Boolean;
+var
+  Code: Integer;
+begin
+  // find.exe returns 0 when tasklist lists the image name.
+  Result := Exec(ExpandConstant('{cmd}'), '/C tasklist /NH /FI "IMAGENAME eq ' + ExeName + '" | find /I "' + ExeName + '"',
+    '', SW_HIDE, ewWaitUntilTerminated, Code) and (Code = 0);
+end;
+
+procedure WaitForExit(ExeName: String);
+var
+  I: Integer;
+begin
+  for I := 1 to 20 do
+  begin
+    if not ProcessRunning(ExeName) then exit;
+    Sleep(500);
+  end;
+end;
+
+// Antes de actualizar hay que liberar los archivos de {app}. Orden: primero la bandeja (si no, su vigilante reinicia el
+// agente) y luego el agente, solo si no hay trabajos en proceso (código 4 = trabajos activos).
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 var
   Code: Integer;
   Agent: String;
 begin
   Result := '';
+  // /F: sin él, la bandeja interpreta el cierre como "ocultar" y sigue bloqueando sus DLL. No tiene trabajos propios.
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM AngelitoPrintBridge.Desktop.exe', '', SW_HIDE, ewWaitUntilTerminated, Code);
+  WaitForExit('AngelitoPrintBridge.Desktop.exe');
   Agent := ExpandConstant('{app}\AngelitoPrintBridge.exe');
-  if FileExists(Agent) then
+  if FileExists(Agent) and ProcessRunning('AngelitoPrintBridge.exe') then
   begin
     Exec(Agent, 'shutdown --if-idle', '', SW_HIDE, ewWaitUntilTerminated, Code);
     if Code = 4 then
@@ -89,8 +113,9 @@ begin
       Result := 'Angelito Print Bridge está imprimiendo. Espere a que terminen los trabajos y vuelva a intentarlo.';
       exit;
     end;
-    Exec(ExpandConstant('{sys}\taskkill.exe'), '/IM AngelitoPrintBridge.Desktop.exe', '', SW_HIDE, ewWaitUntilTerminated, Code);
-    Sleep(1500);
+    WaitForExit('AngelitoPrintBridge.exe');
+    if ProcessRunning('AngelitoPrintBridge.exe') then
+      Result := 'No se pudo detener el agente de Angelito Print Bridge (puede pertenecer a otro usuario de Windows). Ciérrelo y vuelva a intentarlo.';
   end;
 end;
 
