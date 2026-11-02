@@ -73,7 +73,7 @@ de Windows); «Salir» elimina el icono explícitamente.
 - Impresora predeterminada: implementada con `SetDefaultPrinterW`; **no se pulsó en esta máquina** para no cambiar tu configuración.
 - Pendiente de entrada real: clic derecho (menú) y doble clic, porque el usuario estaba usando la app durante la sesión.
 
-## Canal de eventos en tiempo real (sin publicar)
+## Canal de eventos en tiempo real (publicado en agent-v0.4.0)
 - `GET /v1/admin/events` (WebSocket, token Admin, rechaza cualquier Origin): el agente avisa al instante de
   solicitudes de emparejamiento y cambios de trabajos. La bandeja mantiene la conexión (reconexión con espera
   creciente) y trae la ventana al frente ante una nueva solicitud; el sondeo queda como respaldo. Tests en `Phase2Tests`.
