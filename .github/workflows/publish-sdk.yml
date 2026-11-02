@@ -123,10 +123,11 @@ jobs:
           npm init -y >/dev/null && npm pkg set type=module
           SPECS=$(echo "$PUBLISHED" | tr ',' ' ')
           # Peer dependencies a real app would already have.
-          EXTRA="@angelitosystems/print-bridge react@19"
-          for i in 1 2 3 4 5; do npm install $SPECS $EXTRA && break; sleep 20; done
+          PEERS="@angelitosystems/print-bridge react@19 vue@3 svelte@5 @angular/core@22 @angular/common@22 rxjs@7"
+          for i in 1 2 3 4 5; do npm install $SPECS $PEERS && break; sleep 20; done
+          FAILED=0
           for spec in $SPECS; do
             name="${spec%@*}"
-            node -e "import('$name').then(m => { if (!Object.keys(m).length) process.exit(1); console.log('OK $spec', Object.keys(m).join(',')); })"
-            grep -q '"license": "Apache-2.0"' "node_modules/$name/package.json"
+            if node -e "import('$name').then(m => { if (!Object.keys(m).length) process.exit(1); console.log('OK $spec', Object.keys(m).join(',')); })"                && grep -q '"license": "Apache-2.0"' "node_modules/$name/package.json"; then :; else echo "::error::$spec failed"; FAILED=1; fi
           done
+          exit $FAILED

@@ -1,0 +1,43 @@
+# Copyright 2026 Angelito Systems S.A.C.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Read-only check: installs published SDK packages from GitHub Packages into a fresh project, with the peer
+# dependencies a real app would have, and imports each one. Run manually; also reused after publish-sdk.
+name: verify-packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      specs:
+        description: "Paquetes a verificar (separados por espacios), p. ej. @angelitosystems/print-bridge-react@0.1.0"
+        required: true
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          registry-url: https://npm.pkg.github.com
+          scope: '@angelitosystems'
+      - name: Install and import every package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SPECS: ${{ inputs.specs }}
+        run: |
+          mkdir consumer && cd consumer
+          npm init -y >/dev/null && npm pkg set type=module
+          PEERS="@angelitosystems/print-bridge react@19 vue@3 svelte@5 @angular/core@22 @angular/common@22 rxjs@7"
+          npm install $SPECS $PEERS
+          FAILED=0
+          for spec in $SPECS; do
+            name="${spec%@*}"
+            if node -e "import('$name').then(m => { if (!Object.keys(m).length) process.exit(1); console.log('OK $spec →', Object.keys(m).join(', ')); })" \
+               && grep -q '"license": "Apache-2.0"' "node_modules/$name/package.json"; then :; else echo "::error::$spec failed"; FAILED=1; fi
+          done
+          exit $FAILED

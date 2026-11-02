@@ -54,7 +54,9 @@ Fecha: 2026-11-02. Fuente de verdad de lo **verificado**; "publicado" solo cuand
 ## Publicación
 - `publish-sdk.yml`: release `sdk-<etiqueta>` publicado por un mantenedor → publica cada paquete cuya versión no exista
   en GitHub Packages (core primero) tras build, tipos, lint, tests y E2E; luego instala y comprueba en un proyecto aparte.
-- No se ha publicado ninguna versión nueva del ecosistema: requiere autorización explícita.
+- Release `sdk-2026.11.02`: publicados core 0.4.0, react/vue/svelte/angular 0.1.0 (log del workflow `publish-sdk`).
+  Verificación de instalación: core ✔; angular 0.1.0 ✘ (faltaba la peer `@angular/common`) → corregido en 0.1.1, pendiente de publicar.
+  `verify-packages.yml` permite volver a verificar paquetes publicados (solo lectura).
 
 ## Continuar
 ```bash
