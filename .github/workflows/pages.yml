@@ -1,16 +1,18 @@
 # Copyright 2026 Angelito Systems S.A.C.
 # SPDX-License-Identifier: Apache-2.0
 #
-# Builds the website (Astro + Starlight) and deploys it to GitHub Pages. Runs on validated changes in main, on every
-# published release (so the download page shows the new version) and manually. Never runs for pull requests.
+# Builds the website (Astro + Starlight) and deploys it to GitHub Pages. Runs on validated changes in main, after each
+# successful agent release (so the download page shows the new version with its assets) and manually. Never runs for
+# pull requests. Always deploys from main: the github-pages environment rejects tag refs.
 name: pages
 
 on:
   push:
     branches: [main]
     paths: ["apps/website/**", "packages/**", "examples/**", "package-lock.json", ".github/workflows/pages.yml"]
-  release:
-    types: [published]
+  workflow_run:
+    workflows: [release-agent]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -24,7 +26,9 @@ concurrency:
 
 jobs:
   build:
-    if: github.repository == 'angelitosystems/angelito-print-bridge'
+    if: >-
+      github.repository == 'angelitosystems/angelito-print-bridge' &&
+      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
