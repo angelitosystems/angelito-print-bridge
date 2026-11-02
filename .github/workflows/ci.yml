@@ -1,0 +1,79 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  CI: "true"
+  RestoreLockedMode: "true"
+
+jobs:
+  build-test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: sdk/typescript/package-lock.json
+
+      - name: Format
+        run: dotnet format --verify-no-changes
+      - name: Build
+        run: dotnet build -c Release
+      - name: Test (.NET)
+        run: dotnet test -c Release --no-build --logger trx --results-directory TestResults
+      - name: Vulnerable packages
+        shell: pwsh
+        run: |
+          $out = dotnet list package --vulnerable --include-transitive
+          $out
+          if ($out -match "has the following vulnerable packages") { exit 1 }
+
+      - name: SDK install
+        working-directory: sdk/typescript
+        run: npm ci
+      - name: SDK typecheck, test, build
+        working-directory: sdk/typescript
+        run: |
+          npm run typecheck
+          npm run lint
+          npm test
+          npm pack --dry-run
+      - name: SDK audit
+        working-directory: sdk/typescript
+        run: npm audit --audit-level=high
+      - name: E2E (agent + SDK, virtual printer)
+        working-directory: sdk/typescript
+        env:
+          APB_AGENT_EXE: ${{ github.workspace }}/src/Angelito.PrintBridge.Agent/bin/Release/net10.0-windows10.0.19041.0/AngelitoPrintBridge.exe
+        run: npm run test:e2e
+
+      - name: Publish (self-contained)
+        shell: pwsh
+        run: ./installer/publish.ps1
+
+      - name: SBOM
+        run: |
+          dotnet tool install --global CycloneDX
+          dotnet-CycloneDX src/Angelito.PrintBridge.Agent/Angelito.PrintBridge.Agent.csproj -o sbom -fn agent.cdx.json -F Json
+          dotnet-CycloneDX src/Angelito.PrintBridge.Desktop/Angelito.PrintBridge.Desktop.csproj -o sbom -fn desktop.cdx.json -F Json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ci-artifacts
+          path: |
+            TestResults
+            sbom
+# Publicación (npm, instalador firmado) se añadirá como workflow separado con aprobación manual y secretos de entorno.

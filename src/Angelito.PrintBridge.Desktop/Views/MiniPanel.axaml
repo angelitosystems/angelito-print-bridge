@@ -1,0 +1,105 @@
+<!-- Copyright 2026 Angelito Systems S.A.C. · SPDX-License-Identifier: Apache-2.0 -->
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Angelito.PrintBridge.Desktop.ViewModels"
+        x:Class="Angelito.PrintBridge.Desktop.Views.MiniPanel"
+        x:DataType="vm:MainViewModel"
+        Title="Angelito Print Bridge — panel rápido"
+        Width="420" SizeToContent="Height"
+        WindowDecorations="None" CanResize="False" ShowInTaskbar="False" Topmost="True"
+        TransparencyLevelHint="Transparent" Background="Transparent"
+        Opacity="0">
+  <Window.Transitions>
+    <Transitions>
+      <DoubleTransition Property="Opacity" Duration="0:0:0.14" />
+    </Transitions>
+  </Window.Transitions>
+
+  <!-- Outer padding leaves room for the shadow inside the transparent window. -->
+  <Border Margin="10" CornerRadius="14" Background="{DynamicResource SurfaceBrush}"
+          BorderBrush="{DynamicResource BorderSoftBrush}" BorderThickness="1"
+          BoxShadow="0 6 24 0 #40000000">
+    <StackPanel Spacing="0">
+      <Border Classes="accentline" Margin="16,0" CornerRadius="0,0,3,3" />
+      <!-- Header -->
+      <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,14,16,10">
+        <Image Source="/Assets/icon.png" Width="32" Height="32" VerticalAlignment="Center" />
+        <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+          <TextBlock Text="Angelito Print Bridge" FontWeight="SemiBold" FontSize="14" />
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <Ellipse Width="8" Height="8" Fill="{DynamicResource OkBrush}" IsVisible="{Binding AgentOnline}" VerticalAlignment="Center" />
+            <Ellipse Width="8" Height="8" Fill="{DynamicResource WarnBrush}" IsVisible="{Binding !AgentOnline}" VerticalAlignment="Center" />
+            <TextBlock Classes="muted" FontSize="12" Text="Agente activo" IsVisible="{Binding AgentOnline}" />
+            <TextBlock FontSize="12" Text="Agente detenido" Foreground="{DynamicResource WarnBrush}" IsVisible="{Binding !AgentOnline}" />
+          </StackPanel>
+        </StackPanel>
+        <TextBlock Grid.Column="2" Classes="muted" FontSize="12" VerticalAlignment="Top" Text="{Binding Version, StringFormat='v{0}'}" />
+      </Grid>
+
+      <Border Height="1" Background="{DynamicResource BorderSoftBrush}" />
+
+      <!-- Pairing request needs attention -->
+      <Border Classes="attention" Margin="12,10,12,0" Padding="10" CornerRadius="8" IsVisible="{Binding HasPairRequests}">
+        <DockPanel>
+          <Button DockPanel.Dock="Right" Classes="primary" Content="Revisar" Click="OnOpenHome" AutomationProperties.Name="Revisar solicitud de emparejamiento" />
+          <TextBlock Text="Una aplicación solicita permiso para imprimir." TextWrapping="Wrap" VerticalAlignment="Center" />
+        </DockPanel>
+      </Border>
+
+      <!-- Agent stopped -->
+      <Border Margin="12,10,12,0" Padding="10" CornerRadius="8" Background="{DynamicResource AttentionBrush}" IsVisible="{Binding !AgentOnline}">
+        <DockPanel>
+          <Button DockPanel.Dock="Right" Classes="primary" Content="Iniciar" Command="{Binding StartAgentCommand}" AutomationProperties.Name="Iniciar agente" />
+          <TextBlock Text="La impresión está detenida." TextWrapping="Wrap" VerticalAlignment="Center" />
+        </DockPanel>
+      </Border>
+
+      <!-- Content -->
+      <Grid Margin="16,10,16,6" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+        <Grid.Styles>
+          <Style Selector="TextBlock.k"><Setter Property="Foreground" Value="{DynamicResource MutedBrush}" /><Setter Property="Margin" Value="0,4,16,4" /></Style>
+          <Style Selector="TextBlock.v"><Setter Property="Margin" Value="0,4" /><Setter Property="TextTrimming" Value="CharacterEllipsis" /><Setter Property="HorizontalAlignment" Value="Right" /></Style>
+        </Grid.Styles>
+        <TextBlock Classes="k" Text="Impresoras" />
+        <TextBlock Classes="v" Grid.Column="1" Text="{Binding PrinterCount}" />
+        <TextBlock Classes="k" Grid.Row="1" Text="Predeterminada" />
+        <TextBlock Classes="v" Grid.Row="1" Grid.Column="1" Text="{Binding DefaultPrinterName}" ToolTip.Tip="{Binding DefaultPrinterName}" />
+        <TextBlock Classes="k" Grid.Row="2" Text="Trabajos pendientes" />
+        <TextBlock Classes="v" Grid.Row="2" Grid.Column="1" Text="{Binding QueuedJobs}" />
+        <TextBlock Classes="k" Grid.Row="3" Text="Última impresión" />
+        <TextBlock Classes="v" Grid.Row="3" Grid.Column="1" Text="{Binding LastJobText}" />
+        <TextBlock Classes="k" Grid.Row="4" Text="Apps autorizadas" />
+        <TextBlock Classes="v" Grid.Row="4" Grid.Column="1" Text="{Binding Grants.Count}" />
+      </Grid>
+
+      <!-- Quick actions -->
+      <UniformGrid Columns="2" Margin="12,4,12,12">
+        <UniformGrid.Styles>
+          <Style Selector="Button.quick">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="Padding" Value="10,8" />
+          </Style>
+        </UniformGrid.Styles>
+        <Button Classes="quick" Click="OnOpenHome" AutomationProperties.Name="Abrir panel completo">
+          <StackPanel Orientation="Horizontal" Spacing="8"><PathIcon Data="{StaticResource IconHome}" Width="16" Height="16" /><TextBlock Text="Panel completo" /></StackPanel>
+        </Button>
+        <Button Classes="quick" Click="OnTestPrint" AutomationProperties.Name="Imprimir página de prueba">
+          <StackPanel Orientation="Horizontal" Spacing="8"><PathIcon Data="{StaticResource IconPrinter}" Width="16" Height="16" /><TextBlock Text="Página de prueba…" /></StackPanel>
+        </Button>
+        <Button Classes="quick" Click="OnJobs" AutomationProperties.Name="Ver cola de impresión">
+          <StackPanel Orientation="Horizontal" Spacing="8"><PathIcon Data="{StaticResource IconList}" Width="16" Height="16" /><TextBlock Text="Cola de impresión" /></StackPanel>
+        </Button>
+        <Button Classes="quick" Click="OnSettings" AutomationProperties.Name="Configuración">
+          <StackPanel Orientation="Horizontal" Spacing="8"><PathIcon Data="{StaticResource IconSettings}" Width="16" Height="16" /><TextBlock Text="Configuración" /></StackPanel>
+        </Button>
+      </UniformGrid>
+
+      <Border Height="1" Background="{DynamicResource BorderSoftBrush}" />
+      <TextBlock Classes="muted" FontSize="11" Margin="16,8,16,10">
+        <Run Text="Desarrollado por Angelito Systems S.A.C. · " /><Run Text="{Binding Source={x:Static vm:MainViewModel.ProductVersion}, Mode=OneTime}" />
+      </TextBlock>
+    </StackPanel>
+  </Border>
+</Window>

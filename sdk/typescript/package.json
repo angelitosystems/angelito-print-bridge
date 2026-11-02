@@ -1,0 +1,47 @@
+{
+  "name": "@angelitosystems/print-bridge",
+  "version": "0.3.0",
+  "description": "SDK oficial de Angelito Print Bridge (creado por Angelito Systems S.A.C.): impresión silenciosa autorizada desde aplicaciones web.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Angelito Systems S.A.C.",
+    "url": "https://angelitosystems.net"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/angelitosystems/angelito-print-bridge.git",
+    "directory": "sdk/typescript"
+  },
+  "homepage": "https://github.com/angelitosystems/angelito-print-bridge/tree/main/sdk/typescript#readme",
+  "bugs": {
+    "url": "https://github.com/angelitosystems/angelito-print-bridge/issues"
+  },
+  "keywords": ["printing", "silent-printing", "escpos", "pdf", "windows", "print-bridge", "angelito-systems"],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist", "README.md", "LICENSE", "NOTICE"],
+  "engines": { "node": ">=20" },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters --noImplicitReturns --noFallthroughCasesInSwitch",
+    "test": "node --test test/*.test.ts",
+    "test:e2e": "node --test test/e2e/*.test.ts",
+    "prepack": "node -e \"for (const f of ['LICENSE','NOTICE']) require('fs').copyFileSync('../../'+f, f)\" && npm run build"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

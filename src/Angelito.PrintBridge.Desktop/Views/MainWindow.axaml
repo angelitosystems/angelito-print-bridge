@@ -1,0 +1,478 @@
+<!-- Copyright 2026 Angelito Systems S.A.C. · SPDX-License-Identifier: Apache-2.0 -->
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Angelito.PrintBridge.Desktop.ViewModels"
+        x:Class="Angelito.PrintBridge.Desktop.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="Angelito Print Bridge"
+        x:CompileBindings="True"
+        Icon="/Assets/icon.ico"
+        Width="1080" Height="720" MinWidth="760" MinHeight="520"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource PageBrush}">
+
+  <DockPanel>
+    <!-- Status message -->
+    <Border DockPanel.Dock="Bottom" IsVisible="{Binding Message, Converter={x:Static ObjectConverters.IsNotNull}}"
+            Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderSoftBrush}" BorderThickness="0,1,0,0" Padding="16,8">
+      <DockPanel>
+        <Button DockPanel.Dock="Right" Content="Cerrar" Command="{Binding DismissMessageCommand}" AutomationProperties.Name="Cerrar mensaje" />
+        <TextBlock Text="{Binding Message}" VerticalAlignment="Center" TextWrapping="Wrap" />
+      </DockPanel>
+    </Border>
+
+    <Grid ColumnDefinitions="248,*">
+      <!-- Sidebar -->
+      <Border Background="{StaticResource NavGradient}">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Margin="22,22,22,18" Spacing="14">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <Border Width="40" Height="40" CornerRadius="12" Background="{StaticResource AccentGradient}" BoxShadow="0 0 18 0 #667C3AED">
+                <PathIcon Data="{StaticResource IconPrinter}" Width="22" Height="22" Foreground="White" />
+              </Border>
+              <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="Angelito" FontSize="13" Foreground="{StaticResource NavMutedBrush}" />
+                <TextBlock Text="Print Bridge" FontSize="18" FontWeight="Bold" Foreground="{StaticResource AccentTextGradient}" />
+              </StackPanel>
+            </StackPanel>
+            <Border CornerRadius="999" Padding="10,5" Background="#1AFFFFFF" HorizontalAlignment="Left">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Ellipse Width="8" Height="8" Fill="#4ADE80" IsVisible="{Binding AgentOnline}" />
+                <Ellipse Width="8" Height="8" Fill="#F87171" IsVisible="{Binding !AgentOnline}" />
+                <TextBlock FontSize="12" Foreground="{StaticResource NavTextBrush}" Text="Agente activo" IsVisible="{Binding AgentOnline}" />
+                <TextBlock FontSize="12" Foreground="{StaticResource NavTextBrush}" Text="Agente detenido" IsVisible="{Binding !AgentOnline}" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+          <StackPanel DockPanel.Dock="Bottom" Margin="22,12,22,18" Spacing="2">
+            <TextBlock FontSize="11" Foreground="{StaticResource NavMutedBrush}" Text="Creado por Angelito Systems S.A.C." />
+            <TextBlock FontSize="11" Foreground="{StaticResource NavMutedBrush}" Text="{Binding Source={x:Static vm:MainViewModel.ProductVersion}, StringFormat='v{0} · Apache-2.0', Mode=OneTime}" />
+          </StackPanel>
+          <ListBox Classes="nav" SelectedIndex="{Binding SelectedTab}" AutomationProperties.Name="Navegación">
+          <ListBoxItem AutomationProperties.Name="Inicio">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <PathIcon Data="{StaticResource IconHome}" Width="18" Height="18" />
+              <TextBlock Text="Inicio" VerticalAlignment="Center" />
+              <Ellipse Width="8" Height="8" Fill="#F59E0B" VerticalAlignment="Center" IsVisible="{Binding HasPairRequests}" ToolTip.Tip="Solicitud pendiente" />
+            </StackPanel>
+          </ListBoxItem>
+          <ListBoxItem AutomationProperties.Name="Impresoras">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <PathIcon Data="{StaticResource IconPrinter}" Width="18" Height="18" />
+              <TextBlock Text="Impresoras" VerticalAlignment="Center" />
+              
+            </StackPanel>
+          </ListBoxItem>
+          <ListBoxItem AutomationProperties.Name="Trabajos">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <PathIcon Data="{StaticResource IconList}" Width="18" Height="18" />
+              <TextBlock Text="Trabajos" VerticalAlignment="Center" />
+              
+            </StackPanel>
+          </ListBoxItem>
+          <ListBoxItem AutomationProperties.Name="Aplicaciones">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <PathIcon Data="{StaticResource IconShield}" Width="18" Height="18" />
+              <TextBlock Text="Aplicaciones" VerticalAlignment="Center" />
+              
+            </StackPanel>
+          </ListBoxItem>
+          <ListBoxItem AutomationProperties.Name="Certificados">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <PathIcon Data="{StaticResource IconCert}" Width="18" Height="18" />
+              <TextBlock Text="Certificados" VerticalAlignment="Center" />
+              
+            </StackPanel>
+          </ListBoxItem>
+          <ListBoxItem AutomationProperties.Name="Configuración">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <PathIcon Data="{StaticResource IconSettings}" Width="18" Height="18" />
+              <TextBlock Text="Configuración" VerticalAlignment="Center" />
+              
+            </StackPanel>
+          </ListBoxItem>
+          <ListBoxItem AutomationProperties.Name="Acerca de">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <PathIcon Data="{StaticResource IconInfo}" Width="18" Height="18" />
+              <TextBlock Text="Acerca de" VerticalAlignment="Center" />
+              
+            </StackPanel>
+          </ListBoxItem>
+          </ListBox>
+        </DockPanel>
+      </Border>
+
+    <TabControl Grid.Column="1" Classes="navless" SelectedIndex="{Binding SelectedTab}" Padding="0">
+      <!-- ============ INICIO ============ -->
+      <TabItem Header="Inicio" AutomationProperties.Name="Inicio">
+        <ScrollViewer>
+          <StackPanel Margin="32" Spacing="16" MaxWidth="920" HorizontalAlignment="Left">
+            <TextBlock Classes="eyebrow" Text="PANEL" />
+            <TextBlock Classes="h1" Text="Inicio" />
+
+            <ItemsControl ItemsSource="{Binding PairRequests}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:PairRow">
+                  <Border Classes="card attention" Margin="0,0,0,12">
+                    <StackPanel Spacing="8">
+                      <TextBlock Classes="h2" Text="{Binding Title}" TextWrapping="Wrap" />
+                      <TextBlock Text="{Binding Origin, StringFormat='Sitio: {0}'}" FontWeight="SemiBold" />
+                      <TextBlock Classes="muted" Text="{Binding PermissionsText, StringFormat='Permisos solicitados: {0}'}" />
+                      <TextBlock Classes="muted" IsVisible="{Binding AsksRaw}"
+                                 Text="Los comandos directos permiten controlar la impresora (corte, cajón). Apruebe solo si confía en el sitio." />
+                      <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Código de verificación:" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding Code}" FontSize="26" FontWeight="Bold" LetterSpacing="4" FontFamily="Consolas, monospace" />
+                      </StackPanel>
+                      <TextBlock Classes="muted" Text="Compruebe que la página web muestra exactamente el mismo código antes de aprobar." />
+                      <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                        <Button Classes="primary" Content="Aprobar" AutomationProperties.Name="Aprobar solicitud"
+                                Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).ApproveCommand}" CommandParameter="{Binding}" />
+                        <Button Content="Rechazar" AutomationProperties.Name="Rechazar solicitud"
+                                Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).DenyCommand}" CommandParameter="{Binding}" />
+                      </StackPanel>
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <Border Classes="card">
+              <DockPanel>
+                <Button DockPanel.Dock="Right" VerticalAlignment="Center" Content="Iniciar agente" IsVisible="{Binding !AgentOnline}"
+                        Classes="primary" Command="{Binding StartAgentCommand}" />
+                <StackPanel Spacing="4">
+                  <StackPanel Orientation="Horizontal" Spacing="10">
+                    <Ellipse Width="12" Height="12" Fill="{DynamicResource OkBrush}" IsVisible="{Binding AgentOnline}" />
+                    <Ellipse Width="12" Height="12" Fill="{DynamicResource WarnBrush}" IsVisible="{Binding !AgentOnline}" />
+                    <TextBlock Classes="h2" Text="{Binding AgentStatusText}" />
+                  </StackPanel>
+                  <TextBlock Classes="muted" IsVisible="{Binding AgentOnline}">
+                    <Run Text="Versión " /><Run Text="{Binding Version}" /><Run Text="  ·  Escuchando en " /><Run Text="{Binding Endpoint}" />
+                    <Run Text="  ·  Activo desde " /><Run Text="{Binding StartedText}" />
+                  </TextBlock>
+                </StackPanel>
+              </DockPanel>
+            </Border>
+
+            <UniformGrid Columns="3">
+              <Border Classes="card" Margin="0,0,8,0">
+                <StackPanel><TextBlock Classes="muted" Text="Impresoras" /><TextBlock Classes="metric" Text="{Binding PrinterCount}" /></StackPanel>
+              </Border>
+              <Border Classes="card" Margin="4,0">
+                <StackPanel><TextBlock Classes="muted" Text="Trabajos en cola" /><TextBlock Classes="metric" Text="{Binding QueuedJobs}" /></StackPanel>
+              </Border>
+              <Border Classes="card" Margin="8,0,0,0">
+                <StackPanel><TextBlock Classes="muted" Text="Con error o desconocidos" /><TextBlock Classes="metric" Text="{Binding FailedJobs}" /></StackPanel>
+              </Border>
+            </UniformGrid>
+
+            <Border Classes="card">
+              <StackPanel Spacing="10">
+                <TextBlock Classes="h2" Text="Últimos trabajos" />
+                <TextBlock Classes="muted" IsVisible="{Binding HasNoJobs}"
+                           Text="Aún no hay trabajos. Vaya a Impresoras y envíe una página de prueba." />
+                <ItemsControl ItemsSource="{Binding RecentJobs}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:JobRow">
+                      <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,4">
+                        <StackPanel>
+                          <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Classes="muted" FontSize="12" Text="{Binding AppName}" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="1" Text="{Binding StateText}" VerticalAlignment="Center" Margin="12,0"
+                                   Foreground="{DynamicResource WarnBrush}" IsVisible="{Binding IsError}" />
+                        <TextBlock Grid.Column="1" Text="{Binding StateText}" VerticalAlignment="Center" Margin="12,0" IsVisible="{Binding !IsError}" />
+                        <TextBlock Grid.Column="2" Classes="muted" Text="{Binding When}" VerticalAlignment="Center" />
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ============ IMPRESORAS ============ -->
+      <TabItem Header="Impresoras" AutomationProperties.Name="Impresoras">
+        <DockPanel Margin="32">
+          <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+            <Button DockPanel.Dock="Right" Content="Actualizar" Command="{Binding RefreshPrintersCommand}" />
+            <StackPanel>
+              <TextBlock Classes="h1" Text="Impresoras" />
+              <TextBlock Classes="muted" Text="Capacidades tal como las declara cada driver de Windows. La página de prueba imprime en papel." />
+            </StackPanel>
+          </DockPanel>
+          <ScrollViewer>
+            <ItemsControl ItemsSource="{Binding Printers}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:PrinterRow">
+                  <Border Classes="card" Margin="0,0,0,10">
+                    <DockPanel>
+                      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="16,0,0,0">
+                      <Button Content="Usar como predeterminada" IsVisible="{Binding CanBeDefault}"
+                              AutomationProperties.Name="{Binding Name, StringFormat='Establecer {0} como impresora predeterminada'}"
+                              Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).SetDefaultPrinterCommand}" CommandParameter="{Binding}" />
+                      <Button VerticalAlignment="Center" Content="Página de prueba"
+                              AutomationProperties.Name="{Binding Name, StringFormat='Imprimir página de prueba en {0}'}"
+                              Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).TestPrintCommand}" CommandParameter="{Binding}" />
+                      </StackPanel>
+                      <StackPanel Spacing="4">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                          <TextBlock Classes="h2" Text="{Binding Name}" />
+                          <TextBlock Text="{Binding Badges}" Foreground="{DynamicResource BrandBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="{Binding StatusText, StringFormat='Estado: {0}'}" Foreground="{DynamicResource WarnBrush}" IsVisible="{Binding HasProblem}" />
+                        <TextBlock Text="{Binding StatusText, StringFormat='Estado: {0}'}" IsVisible="{Binding !HasProblem}" />
+                        <TextBlock Classes="muted" Text="{Binding CapabilitiesText}" />
+                      </StackPanel>
+                    </DockPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </DockPanel>
+      </TabItem>
+
+      <!-- ============ TRABAJOS ============ -->
+      <TabItem Header="Trabajos" AutomationProperties.Name="Trabajos">
+        <DockPanel Margin="32">
+          <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+            <CheckBox DockPanel.Dock="Right" Content="Solo errores" IsChecked="{Binding ShowOnlyErrors}" />
+            <StackPanel>
+              <TextBlock Classes="h1" Text="Trabajos" />
+              <TextBlock Classes="muted" Text="«Completado» significa que el trabajo salió de la cola de Windows; no confirma que el papel salió." />
+            </StackPanel>
+          </DockPanel>
+          <Border DockPanel.Dock="Right" Classes="card" Width="340" Margin="12,0,0,0" IsVisible="{Binding SelectedJob, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="h2" Text="Detalles técnicos" />
+              <SelectableTextBlock Text="{Binding SelectedJob.Details}" TextWrapping="Wrap" FontFamily="Consolas, monospace" FontSize="12" />
+              <Button Content="Cancelar trabajo" IsVisible="{Binding SelectedJob.CanCancel}"
+                      Command="{Binding CancelJobCommand}" CommandParameter="{Binding SelectedJob}" />
+            </StackPanel>
+          </Border>
+          <Panel>
+            <StackPanel IsVisible="{Binding HasNoJobs}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+              <PathIcon Data="{StaticResource IconList}" Width="40" Height="40" Foreground="{DynamicResource MutedBrush}" />
+              <TextBlock Classes="muted" Text="No hay trabajos para mostrar." HorizontalAlignment="Center" />
+              <TextBlock Classes="muted" FontSize="12" Text="Envíe una página de prueba desde Impresoras." HorizontalAlignment="Center" />
+            </StackPanel>
+            <ListBox ItemsSource="{Binding Jobs}" SelectedItem="{Binding SelectedJob}" AutomationProperties.Name="Lista de trabajos"
+                     Background="Transparent">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:JobRow">
+                  <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                    <StackPanel>
+                      <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Classes="muted" FontSize="12">
+                        <Run Text="{Binding AppName}" /><Run Text="  ·  " /><Run Text="{Binding When}" />
+                      </TextBlock>
+                      <TextBlock FontSize="12" Text="{Binding ErrorText}" Foreground="{DynamicResource WarnBrush}" TextWrapping="Wrap"
+                                 IsVisible="{Binding IsError}" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Text="{Binding StateText}" VerticalAlignment="Center" Margin="12,0,0,0" />
+                  </Grid>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Panel>
+        </DockPanel>
+      </TabItem>
+
+      <!-- ============ APLICACIONES ============ -->
+      <TabItem Header="Aplicaciones" AutomationProperties.Name="Aplicaciones">
+        <ScrollViewer>
+          <StackPanel Margin="32" Spacing="12" MaxWidth="900" HorizontalAlignment="Left">
+            <TextBlock Classes="h1" Text="Aplicaciones autorizadas" />
+            <TextBlock Classes="muted" Text="Solo estos sitios pueden imprimir en este equipo. Revocar corta el acceso de inmediato." />
+            <Border Classes="card" IsVisible="{Binding HasNoGrants}">
+              <StackPanel Orientation="Horizontal" Spacing="14">
+                <PathIcon Data="{StaticResource IconShield}" Width="32" Height="32" Foreground="{DynamicResource MutedBrush}" />
+                <TextBlock Classes="muted" VerticalAlignment="Center"
+                           Text="Ninguna aplicación autorizada. Cuando una web solicite acceso, la solicitud aparecerá en Inicio." />
+              </StackPanel>
+            </Border>
+            <ItemsControl ItemsSource="{Binding Grants}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:GrantRow">
+                  <Border Classes="card" Margin="0,0,0,10">
+                    <DockPanel>
+                      <Button DockPanel.Dock="Right" VerticalAlignment="Center" Margin="16,0,0,0" Content="Revocar"
+                              AutomationProperties.Name="{Binding AppName, StringFormat='Revocar acceso de {0}'}"
+                              Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).RevokeCommand}" CommandParameter="{Binding}" />
+                      <StackPanel Spacing="4">
+                        <TextBlock Classes="h2" Text="{Binding AppName}" />
+                        <TextBlock Text="{Binding Origin}" FontWeight="SemiBold" />
+                        <TextBlock Classes="muted" Text="{Binding PermissionsText}" />
+                        <TextBlock Classes="muted" FontSize="12">
+                          <Run Text="{Binding AppId}" /><Run Text="  ·  " /><Run Text="{Binding CreatedText}" />
+                        </TextBlock>
+                      </StackPanel>
+                    </DockPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+
+      <!-- ============ CERTIFICADOS ============ -->
+      <TabItem Header="Certificados" AutomationProperties.Name="Certificados">
+        <ScrollViewer>
+          <StackPanel Margin="32" Spacing="14" MaxWidth="920" HorizontalAlignment="Left">
+            <TextBlock Classes="eyebrow" Text="IDENTIDAD DE APLICACIONES" />
+            <TextBlock Classes="h1" Text="Certificados" />
+            <TextBlock Classes="muted" Text="Un sitio con un certificado autorizado aquí se conecta e imprime sin pedir aprobación cada vez. Su servidor firma con la clave privada; este equipo solo guarda el certificado público." />
+
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <Border Classes="accentline" Width="48" HorizontalAlignment="Left" />
+                <TextBlock Classes="h2" Text="Nuevo certificado" />
+                <Grid ColumnDefinitions="*,16,*" RowDefinitions="Auto,Auto">
+                  <TextBlock Text="Origen del sitio" Margin="0,0,0,4" />
+                  <TextBox Grid.Row="1" Text="{Binding NewCertOrigin}" Watermark="https://app.suempresa.com" AutomationProperties.Name="Origen del sitio" />
+                  <TextBlock Grid.Column="2" Text="Nombre de la aplicación" Margin="0,0,0,4" />
+                  <TextBox Grid.Column="2" Grid.Row="1" Text="{Binding NewCertName}" Watermark="Clínica Dental" AutomationProperties.Name="Nombre de la aplicación" />
+                </Grid>
+                <StackPanel Orientation="Horizontal" Spacing="18">
+                  <CheckBox Content="Ver impresoras" IsChecked="{Binding NewCertPrinters}" />
+                  <CheckBox Content="Imprimir PDF e imágenes" IsChecked="{Binding NewCertDocument}" />
+                  <CheckBox Content="Comandos directos (ESC/POS, ZPL)" IsChecked="{Binding NewCertRaw}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <Button Classes="primary" Content="Generar certificado y llaves" Command="{Binding GenerateCertificateCommand}" />
+                  <Button Content="Importar certificado (.pem)…" Command="{Binding ImportCertificateCommand}" />
+                </StackPanel>
+                <TextBlock Classes="muted" FontSize="12" Text="Se guardan certificate.pem (público) y private-key.pem (secreto) en Documentos › Angelito Print Bridge › certificados. La clave privada no queda guardada en este equipo: muévala a su servidor." />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card" IsVisible="{Binding HasNoCertificates}">
+              <StackPanel Orientation="Horizontal" Spacing="14">
+                <PathIcon Data="{StaticResource IconCert}" Width="32" Height="32" Foreground="{DynamicResource MutedBrush}" />
+                <TextBlock Classes="muted" VerticalAlignment="Center" Text="Aún no hay certificados autorizados. Sin certificado, cada sitio usa el emparejamiento con código." />
+              </StackPanel>
+            </Border>
+            <ItemsControl ItemsSource="{Binding Certificates}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:CertRow">
+                  <Border Classes="card" Margin="0,0,0,10">
+                    <DockPanel>
+                      <Button DockPanel.Dock="Right" VerticalAlignment="Center" Margin="16,0,0,0" Content="Revocar"
+                              AutomationProperties.Name="{Binding Name, StringFormat='Revocar certificado {0}'}"
+                              Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).RevokeCertificateCommand}" CommandParameter="{Binding}" />
+                      <StackPanel Spacing="4">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                          <TextBlock Classes="h2" Text="{Binding Name}" />
+                          <TextBlock Text="Vencido" Foreground="{DynamicResource WarnBrush}" IsVisible="{Binding Expired}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="{Binding Origin}" FontWeight="SemiBold" />
+                        <TextBlock Classes="muted" Text="{Binding PermissionsText}" />
+                        <TextBlock Classes="muted" FontSize="12" Text="{Binding Details}" />
+                      </StackPanel>
+                    </DockPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ============ CONFIGURACIÓN ============ -->
+      <TabItem Header="Configuración" AutomationProperties.Name="Configuración">
+        <ScrollViewer>
+          <StackPanel Margin="32" Spacing="12" MaxWidth="760" HorizontalAlignment="Left">
+            <TextBlock Classes="h1" Text="Configuración" />
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <TextBlock Classes="h2" Text="General" />
+                <ToggleSwitch IsChecked="{Binding AutoStartEnabled}" OnContent="Iniciar con Windows" OffContent="Iniciar con Windows" />
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                  <TextBlock Text="Tema" VerticalAlignment="Center" />
+                  <ComboBox SelectedIndex="{Binding ThemeIndex}" Width="180" AutomationProperties.Name="Tema">
+                    <ComboBoxItem Content="Según Windows" />
+                    <ComboBoxItem Content="Claro" />
+                    <ComboBoxItem Content="Oscuro" />
+                  </ComboBox>
+                </StackPanel>
+              </StackPanel>
+            </Border>
+            <Border Classes="card">
+              <StackPanel Spacing="8">
+                <TextBlock Classes="h2" Text="Seguridad" />
+                <TextBlock Classes="muted" Text="El agente solo acepta conexiones de este equipo, de sitios https autorizados por usted. Ningún puerto se expone a la red." />
+                <TextBlock Classes="muted" Text="Chrome y Edge pedirán permiso de «acceso a la red local» la primera vez que una web autorizada se conecte: es esperado." />
+              </StackPanel>
+            </Border>
+            <Border Classes="card">
+              <StackPanel Spacing="8">
+                <TextBlock Classes="h2" Text="Diagnósticos y registros" />
+                <TextBlock Classes="muted" Text="El diagnóstico incluye estado, impresoras, trabajos, auditoría y registros. No incluye documentos ni credenciales." />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <Button Content="Exportar diagnóstico" Command="{Binding ExportDiagnosticsCommand}" />
+                  <Button Content="Abrir carpeta de registros" Command="{Binding OpenLogsCommand}" />
+                </StackPanel>
+                <SelectableTextBlock Classes="muted" Text="{Binding DataDirectory, StringFormat='Datos: {0}'}" TextWrapping="Wrap" />
+              </StackPanel>
+            </Border>
+            <Border Classes="card">
+              <StackPanel Spacing="6">
+                <TextBlock Classes="h2" Text="Actualizaciones" />
+                <TextBlock Classes="muted" Text="Las actualizaciones automáticas firmadas llegarán en una versión posterior. Por ahora, instale nuevas versiones manualmente." />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ============ ACERCA DE ============ -->
+      <TabItem Header="Acerca de" AutomationProperties.Name="Acerca de">
+        <ScrollViewer>
+          <StackPanel Margin="32" Spacing="12" MaxWidth="760" HorizontalAlignment="Left">
+            <TextBlock Classes="h1" Text="Acerca de" />
+            <Border Classes="card">
+              <Grid ColumnDefinitions="Auto,*">
+                <Image Source="/Assets/icon.png" Width="56" Height="56" VerticalAlignment="Top" />
+                <StackPanel Grid.Column="1" Margin="16,0,0,0" Spacing="4">
+                  <TextBlock Classes="h2" Text="Angelito Print Bridge" />
+                  <TextBlock Text="{Binding Source={x:Static vm:MainViewModel.ProductVersion}, StringFormat='Versión {0}', Mode=OneTime}" />
+                  <TextBlock Classes="muted" Text="Creado por Angelito Systems S.A.C." Margin="0,6,0,0" />
+                  <TextBlock Classes="muted" Text="Copyright © 2026 Angelito Systems S.A.C." />
+                  <HyperlinkButton Content="angelitosystems.net" NavigateUri="https://angelitosystems.net" Padding="0"
+                                   AutomationProperties.Name="Abrir el sitio web angelitosystems.net" />
+                </StackPanel>
+              </Grid>
+            </Border>
+            <Border Classes="card">
+              <StackPanel Spacing="6">
+                <TextBlock Classes="h2" Text="Licencia" />
+                <TextBlock Classes="muted" Text="Software libre y gratuito bajo Apache License 2.0: puede usarlo, modificarlo y distribuirlo, también con fines comerciales, conservando los avisos de LICENSE y NOTICE. Sin activaciones, pagos ni funciones bloqueadas." />
+                <TextBlock Classes="muted" Text="La impresión silenciosa sigue requiriendo que usted autorice cada aplicación: es una medida de seguridad, no una licencia." />
+              </StackPanel>
+            </Border>
+            <Border Classes="card">
+              <StackPanel Spacing="6">
+                <TextBlock Classes="h2" Text="Componentes de terceros" />
+                <TextBlock Classes="muted" Text="Avalonia (MIT) · CommunityToolkit.Mvvm (MIT) · Microsoft .NET, ASP.NET Core y Microsoft.Data.Sqlite (MIT) · SQLitePCLRaw (Apache-2.0) y SQLite (dominio público) · Serilog (Apache-2.0) · fuente Inter (SIL OFL 1.1) · iconos Material Design Icons (Apache-2.0)." />
+                <TextBlock Classes="muted" Text="Detalle completo en THIRD-PARTY-NOTICES.md, incluido con la instalación." />
+              </StackPanel>
+            </Border>
+            <Border Classes="card">
+              <StackPanel Spacing="6">
+                <TextBlock Classes="h2" Text="Marca" />
+                <TextBlock Classes="muted" Text="El nombre y el logotipo de Angelito Systems no están incluidos en la licencia del código. Las versiones modificadas no deben presentarse como oficiales ni respaldadas por Angelito Systems S.A.C." />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+    </TabControl>
+    </Grid>
+  </DockPanel>
+</Window>

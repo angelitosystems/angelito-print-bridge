@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>$(WindowsTfm)</TargetFramework>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <AssemblyName>AngelitoPrintBridge</AssemblyName>
+    <RootNamespace>Angelito.PrintBridge.Agent</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <ProjectReference Include="..\Angelito.PrintBridge.Core\Angelito.PrintBridge.Core.csproj" />
+    <ProjectReference Include="..\Angelito.PrintBridge.Windows\Angelito.PrintBridge.Windows.csproj" />
+    <InternalsVisibleTo Include="Angelito.PrintBridge.Tests" />
+  </ItemGroup>
+</Project>

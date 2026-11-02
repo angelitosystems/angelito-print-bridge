@@ -1,0 +1,102 @@
+# Copyright 2026 Angelito Systems S.A.C.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Builds the Windows agent + tray app when a GitHub Release tagged `agent-vX.Y.Z` is published, runs every test,
+# and attaches the portable zips, installers and checksums to that release.
+# GitHub Releases = agent and installers · GitHub Packages = npm SDK (see publish-sdk.yml).
+name: release-agent
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-agent
+  cancel-in-progress: false
+
+env:
+  CI: "true"
+  RestoreLockedMode: "true"
+
+jobs:
+  release:
+    if: >-
+      github.repository == 'angelitosystems/angelito-print-bridge' &&
+      startsWith(github.event.release.tag_name, 'agent-v')
+    runs-on: windows-latest
+    environment: releases
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Release commit must be on main
+        shell: bash
+        run: |
+          git fetch --no-tags origin main
+          git merge-base --is-ancestor "$(git rev-parse HEAD)" origin/main || { echo "::error::Tag is not on main"; exit 1; }
+
+      - name: Version must match tag
+        shell: pwsh
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          [xml] $p = Get-Content Directory.Build.props
+          $v = $p.Project.PropertyGroup.Version
+          if ("agent-v$v" -ne $env:TAG) { throw "Directory.Build.props $v does not match tag $env:TAG" }
+          "VERSION=$v" | Out-File $env:GITHUB_ENV -Append
+
+      - name: Test (.NET)
+        run: dotnet test -c Release
+
+      - name: Test (SDK E2E against this build)
+        working-directory: sdk/typescript
+        env:
+          APB_AGENT_EXE: ${{ github.workspace }}/src/Angelito.PrintBridge.Agent/bin/Release/net10.0-windows10.0.19041.0/AngelitoPrintBridge.exe
+        run: |
+          npm ci
+          npm test
+          npm run test:e2e
+
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      # x64 is tested above. ARM64 is cross-compiled and NOT validated on ARM64 hardware (stated in the release notes).
+      - name: Publish and build installers
+        shell: pwsh
+        run: |
+          ./installer/publish.ps1 -Runtime win-x64
+          ./installer/publish.ps1 -Runtime win-arm64
+
+      - name: Zip and checksums
+        shell: pwsh
+        run: |
+          foreach ($rid in "win-x64", "win-arm64") {
+            Compress-Archive -Path "artifacts/$rid/app/*" -DestinationPath "artifacts/AngelitoPrintBridge-$env:VERSION-$rid-portable.zip"
+          }
+          $files = Get-ChildItem artifacts -File | Where-Object Name -match '\.(zip|exe)$'
+          $files | ForEach-Object { "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(), $_.Name } |
+            Set-Content artifacts/SHA256SUMS.txt
+          Get-Content artifacts/SHA256SUMS.txt
+
+      # Code signing would go here using secrets of the protected "releases" environment (docs/RELEASE.md).
+
+      - name: Attach to release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          $assets = (Get-ChildItem artifacts -File | Where-Object Name -match '\.(zip|exe|txt)$').FullName
+          gh release upload $env:TAG $assets --clobber --repo $env:GITHUB_REPOSITORY

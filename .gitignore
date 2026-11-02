@@ -1,0 +1,12 @@
+bin/
+obj/
+node_modules/
+dist/
+*.user
+.vs/
+TestResults/
+*.token
+artifacts/
+sdk/typescript/LICENSE
+sdk/typescript/NOTICE
+*.tgz

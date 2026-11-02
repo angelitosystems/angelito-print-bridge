@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Angelito.PrintBridge.Agent/Angelito.PrintBridge.Agent.csproj" />
+    <Project Path="src/Angelito.PrintBridge.Core/Angelito.PrintBridge.Core.csproj" />
+    <Project Path="src/Angelito.PrintBridge.Desktop/Angelito.PrintBridge.Desktop.csproj" />
+    <Project Path="src/Angelito.PrintBridge.Windows/Angelito.PrintBridge.Windows.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Angelito.PrintBridge.Tests/Angelito.PrintBridge.Tests.csproj" />
+  </Folder>
+</Solution>

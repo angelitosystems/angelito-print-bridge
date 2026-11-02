@@ -1,0 +1,94 @@
+# Copyright 2026 Angelito Systems S.A.C.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Publishes @angelitosystems/print-bridge to GitHub Packages when a stable GitHub Release tagged `sdk-vX.Y.Z` is
+# published. Uses only the automatic GITHUB_TOKEN (no npm tokens, no PATs, no npmjs.com).
+name: publish-sdk
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: publish-sdk
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    # Stable SDK releases of the official repository only (never forks, never prereleases, never agent tags).
+    if: >-
+      github.repository == 'angelitosystems/angelito-print-bridge' &&
+      startsWith(github.event.release.tag_name, 'sdk-v') &&
+      !github.event.release.prerelease && !github.event.release.draft
+    runs-on: windows-latest
+    environment: github-packages
+    defaults:
+      run:
+        working-directory: sdk/typescript
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Release commit must be on main
+        shell: bash
+        run: |
+          git fetch --no-tags origin main
+          git merge-base --is-ancestor "$(git rev-parse HEAD)" origin/main || { echo "::error::Tag is not on main"; exit 1; }
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          registry-url: https://npm.pkg.github.com
+          scope: '@angelitosystems'
+          cache: npm
+          cache-dependency-path: sdk/typescript/package-lock.json
+
+      - name: Version must match tag
+        shell: bash
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          [ "sdk-v$VERSION" = "$TAG" ] || { echo "::error::package.json $VERSION does not match tag $TAG"; exit 1; }
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Version must not be published yet
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if npm view "@angelitosystems/print-bridge@$VERSION" version >/dev/null 2>&1; then
+            echo "::error::@angelitosystems/print-bridge@$VERSION already exists"; exit 1
+          fi
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+
+      - name: End-to-end against the real Windows agent
+        working-directory: .
+        run: dotnet build src/Angelito.PrintBridge.Agent -c Release
+      - name: Run E2E
+        env:
+          APB_AGENT_EXE: ${{ github.workspace }}/src/Angelito.PrintBridge.Agent/bin/Release/net10.0-windows10.0.19041.0/AngelitoPrintBridge.exe
+        run: npm run test:e2e
+
+      - name: Package contents
+        run: npm pack --dry-run
+
+      - name: Publish to GitHub Packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm publish

@@ -1,0 +1,12 @@
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+insert_final_newline = true
+
+[*.{cs,csproj,props}]
+indent_size = 4
+
+[*.{ts,json,yml,yaml,md}]
+indent_size = 2
