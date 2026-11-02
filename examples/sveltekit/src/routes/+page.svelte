@@ -12,6 +12,8 @@
   }
 </script>
 
+<svelte:head><title>Angelito Print Bridge · SvelteKit</title></svelte:head>
+
 <h1>Angelito Print Bridge · SvelteKit</h1>
 <p>Estado: <strong>{$connectionState}</strong></p>
 {#if $error}<p role="alert">{$error.code}: {$error.message}</p>{/if}
