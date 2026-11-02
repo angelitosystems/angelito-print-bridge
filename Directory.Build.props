@@ -14,6 +14,8 @@
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <!-- Restore for every published RID so locked-mode restore also works for dotnet publish -r. -->
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
     <Version>0.3.0</Version>
   </PropertyGroup>
 </Project>
