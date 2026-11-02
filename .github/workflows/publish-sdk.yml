@@ -123,11 +123,14 @@ jobs:
           npm init -y >/dev/null && npm pkg set type=module
           SPECS=$(echo "$PUBLISHED" | tr ',' ' ')
           # Peer dependencies a real app would already have.
-          PEERS="@angelitosystems/print-bridge react@19 vue@3 svelte@5 @angular/core@22 @angular/common@22 rxjs@7"
+          PEERS="@angelitosystems/print-bridge react@19 vue@3 svelte@5 @angular/core@22 @angular/common@22 @angular/compiler@22 rxjs@7"
           for i in 1 2 3 4 5; do npm install $SPECS $PEERS && break; sleep 20; done
           FAILED=0
           for spec in $SPECS; do
             name="${spec%@*}"
-            if node -e "import('$name').then(m => { if (!Object.keys(m).length) process.exit(1); console.log('OK $spec', Object.keys(m).join(',')); })"                && grep -q '"license": "Apache-2.0"' "node_modules/$name/package.json"; then :; else echo "::error::$spec failed"; FAILED=1; fi
+            # Angular libraries are partially compiled: outside the Angular CLI linker they need the JIT compiler loaded.
+            PRE=""; case "$name" in *angular*) PRE="await import('@angular/compiler');";; esac
+            if node --input-type=module -e "$PRE const m = await import('$name'); if (!Object.keys(m).length) process.exit(1); console.log('OK $spec', Object.keys(m).join(','));" \
+               && grep -q '"license": "Apache-2.0"' "node_modules/$name/package.json"; then :; else echo "::error::$spec failed"; FAILED=1; fi
           done
           exit $FAILED
