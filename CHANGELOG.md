@@ -10,7 +10,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); e
   `usePrinter`, `usePrintJob`, `usePrintQueue`, `usePrint`). Compatible con Next.js App Router (`"use client"`).
 - `@angelitosystems/print-bridge-vue` 0.1.0 (plugin + composables, Nuxt con plugin `.client.ts`) y
   `@angelitosystems/print-bridge-svelte` 0.1.0 (contexto + stores, SvelteKit SSR).
-- Ejemplos: vanilla-typescript, react-vite, nextjs, vue-vite, nuxt, sveltekit.
+- `@angelitosystems/print-bridge-angular` 0.1.0: `providePrintBridge`, `PrintBridgeService`, `PrinterService`,
+  `PrintJobService` con signals; APF con ng-packagr; zoneless y SSR.
+- Ejemplos: angular, vanilla-typescript, react-vite, nextjs, vue-vite, nuxt, sveltekit.
 - Logotipo oficial como icono de la app, bandeja e instalador.
 
 ## [0.3.0] — publicado (agent-v0.3.0, sdk-v0.3.0)

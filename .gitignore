@@ -17,3 +17,5 @@ next-env.d.ts
 .nuxt/
 .output/
 examples/*/build/
+packages/angular/dist/
+examples/angular/.angular/

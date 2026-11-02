@@ -20,7 +20,7 @@ Fecha: 2026-11-02. Fuente de verdad de lo **verificado**; "publicado" solo cuand
 | SvelteKit / Nuxt | — | — | — | — | Sin paquete propio: `providePrintBridge` (contexto por petición) y el plugin Vue en `.client.ts` cubren SSR. |
 | `@angelitosystems/print-bridge-vue` | 0.1.0 | ✔ | ✔ 4 (plugin, composables, 2 componentes = 1 conexión, limpieza al desmontar, SSR sin contactar al agente) | — (mock) | ✔ |
 | `@angelitosystems/print-bridge-svelte` | 0.1.0 | ✔ | ✔ 3 (contexto, stores con runes, 1 conexión, limpieza) | — (mock) | ✔ |
-| `@angelitosystems/print-bridge-angular` | — | pendiente | — | — | — |
+| `@angelitosystems/print-bridge-angular` | 0.1.0 | ✔ ng-packagr (APF, `fesm2022`) | ✔ 3 (DI compartida, signals, DestroyRef, plataforma servidor sin conexión) | — (mock) | ✔ (se publica `dist/`) |
 
 ## Ejemplos
 | Ejemplo | Compila | Probado en navegador |
@@ -31,7 +31,7 @@ Fecha: 2026-11-02. Fuente de verdad de lo **verificado**; "publicado" solo cuand
 | `examples/nuxt` | ✔ `nuxt generate` (plugin `.client.ts`, `<ClientOnly>`) | pendiente |
 | `examples/sveltekit` | ✔ prerender SSR (HTML con `disconnected`, sin conexión en servidor) + `svelte-check` 0 errores | pendiente |
 | `examples/vanilla-typescript` | ✔ `vite build` | pendiente |
-| `examples/angular` | pendiente | — |
+| `examples/angular` | ✔ `ng build` (standalone, zoneless, signals) | pendiente |
 
 ## Publicación
 - `publish-sdk.yml`: release `sdk-<etiqueta>` publicado por un mantenedor → publica cada paquete cuya versión no exista
@@ -43,5 +43,5 @@ Fecha: 2026-11-02. Fuente de verdad de lo **verificado**; "publicado" solo cuand
 npm ci && npm run build && npm run typecheck && npm run lint && npm test
 cd packages/core && npm run test:e2e   # requiere dotnet build del agente
 ```
-Pendiente, en orden: Angular (APF) + ejemplo → web (Astro/Starlight) + GitHub Pages → pruebas en navegador de cada ejemplo con el agente real.
+Pendiente, en orden: web (Astro/Starlight) + GitHub Pages → pruebas en navegador de cada ejemplo con el agente real.
 Nota Svelte: el store de conexión se llama `connectionState` (no `state`, que choca con la rune `$state`).

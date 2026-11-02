@@ -94,7 +94,9 @@ jobs:
           ORDERED=$(for d in $DIRS; do [ "$d" = "packages/core" ] && echo "0 $d" || echo "1 $d"; done | sort | cut -d' ' -f2)
           SPECS=""
           for dir in $ORDERED; do
-            (cd "$dir" && npm pack --dry-run && npm publish)
+            # Angular is built in Angular Package Format: publish its generated dist/ (no scripts, APF entry points).
+            pub="$dir"; [ -f "$dir/ng-package.json" ] && pub="$dir/dist"
+            (cd "$pub" && npm pack --dry-run && npm publish)
             SPECS="$SPECS,$(node -p "const p=require('./$dir/package.json'); p.name+'@'+p.version")"
           done
           echo "published=${SPECS#,}" >> "$GITHUB_OUTPUT"

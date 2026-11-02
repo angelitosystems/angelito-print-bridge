@@ -3,9 +3,13 @@
   "private": true,
   "description": "Angelito Print Bridge — monorepo de SDK, ejemplos y sitio web. Creado por Angelito Systems S.A.C.",
   "license": "Apache-2.0",
-  "workspaces": ["packages/*", "examples/*", "apps/*"],
+  "workspaces": [
+    "packages/*",
+    "examples/*",
+    "apps/*"
+  ],
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build -w @angelitosystems/print-bridge && npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present"
