@@ -1,0 +1,68 @@
+{
+  "name": "@angelitosystems/print-bridge-svelte",
+  "version": "0.1.0",
+  "description": "Integración Svelte 5 / SvelteKit (contexto y stores) de Angelito Print Bridge, creado por Angelito Systems S.A.C.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Angelito Systems S.A.C.",
+    "url": "https://angelitosystems.net"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/angelitosystems/angelito-print-bridge.git",
+    "directory": "packages/svelte"
+  },
+  "homepage": "https://github.com/angelitosystems/angelito-print-bridge/tree/main/packages/svelte#readme",
+  "bugs": {
+    "url": "https://github.com/angelitosystems/angelito-print-bridge/issues"
+  },
+  "keywords": [
+    "printing",
+    "svelte",
+    "sveltekit",
+    "stores",
+    "print-bridge",
+    "angelito-systems"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit --noUnusedLocals --noUnusedParameters",
+    "test": "vitest run",
+    "prepack": "node -e \"for (const f of ['LICENSE','NOTICE']) require('fs').copyFileSync('../../'+f, f)\" && npm run build"
+  },
+  "peerDependencies": {
+    "@angelitosystems/print-bridge": "^0.4.0",
+    "svelte": "^5.0.0"
+  },
+  "devDependencies": {
+    "@angelitosystems/print-bridge": "*",
+    "@angelitosystems/print-bridge-shared-testing": "*",
+    "jsdom": "^30.1.3",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.5",
+    "svelte": "^5.57.3",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "@testing-library/svelte": "^5.4.2"
+  }
+}

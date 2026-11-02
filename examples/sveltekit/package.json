@@ -1,0 +1,23 @@
+{
+  "name": "example-sveltekit",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "svelte-kit sync && vite build",
+    "typecheck": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
+  },
+  "dependencies": {
+    "@angelitosystems/print-bridge": "*",
+    "@angelitosystems/print-bridge-svelte": "*"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-static": "^4.0.1",
+    "@sveltejs/kit": "^3.1.1",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "svelte": "^5.57.3",
+    "svelte-check": "^4.7.8",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.5"
+  }
+}

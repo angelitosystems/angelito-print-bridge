@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Angelito Print Bridge · TypeScript</title>
+  </head>
+  <body style="font-family: system-ui; max-width: 720px; margin: 2rem auto; padding: 0 1rem">
+    <h1>Angelito Print Bridge · TypeScript</h1>
+    <p>Estado: <strong id="state">disconnected</strong></p>
+    <p id="error" role="alert" hidden></p>
+    <button id="connect">Conectar con el agente</button>
+    <button id="pair" hidden>Autorizar</button>
+    <p id="code" hidden></p>
+    <section id="ready" hidden>
+      <select id="printers" aria-label="Impresora"></select>
+      <button id="print">Imprimir PDF de prueba</button>
+      <ul id="jobs"></ul>
+    </section>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

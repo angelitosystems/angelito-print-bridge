@@ -13,3 +13,7 @@ packages/*/NOTICE
 .next/
 next-env.d.ts
 *.tsbuildinfo
+.svelte-kit/
+.nuxt/
+.output/
+examples/*/build/

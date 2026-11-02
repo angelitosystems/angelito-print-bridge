@@ -1,0 +1,12 @@
+{
+  "name": "example-vue-vite",
+  "private": true,
+  "type": "module",
+  "scripts": { "dev": "vite", "build": "vue-tsc --noEmit && vite build", "typecheck": "vue-tsc --noEmit" },
+  "dependencies": {
+    "@angelitosystems/print-bridge": "*",
+    "@angelitosystems/print-bridge-vue": "*",
+    "vue": "^3.5.44"
+  },
+  "devDependencies": { "@vitejs/plugin-vue": "^6.0.10", "typescript": "^5.9.3", "vite": "^8.3.5", "vue-tsc": "^3.3.14" }
+}

@@ -51,7 +51,7 @@ jobs:
           npm run lint
           npm test
       - name: Package contents (publishable packages)
-        run: npm pack --dry-run --workspace packages/core --workspace packages/react
+        run: npm pack --dry-run --workspace packages/core --workspace packages/react --workspace packages/vue --workspace packages/svelte
       - name: JS audit
         run: npm audit --audit-level=high
       - name: E2E (agent + SDK, virtual printer)
