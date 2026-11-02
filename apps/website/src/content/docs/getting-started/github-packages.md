@@ -23,8 +23,8 @@ npm install @angelitosystems/print-bridge
 
 | Paquete | Uso | Estado |
 |---|---|---|
-| `@angelitosystems/print-bridge` | Núcleo (cualquier framework) | Publicado 0.3.0 · 0.4.0 en el repositorio |
-| `@angelitosystems/print-bridge-react` | React y Next.js | En el repositorio, publicación pendiente |
-| `@angelitosystems/print-bridge-angular` | Angular | En el repositorio, publicación pendiente |
-| `@angelitosystems/print-bridge-svelte` | Svelte / SvelteKit | En el repositorio, publicación pendiente |
-| `@angelitosystems/print-bridge-vue` | Vue / Nuxt | En el repositorio, publicación pendiente |
+| `@angelitosystems/print-bridge` | Núcleo (cualquier framework) | Publicado 0.4.0 |
+| `@angelitosystems/print-bridge-react` | React y Next.js | Publicado 0.1.0 |
+| `@angelitosystems/print-bridge-angular` | Angular | Publicado 0.1.0 |
+| `@angelitosystems/print-bridge-svelte` | Svelte / SvelteKit | Publicado 0.1.0 |
+| `@angelitosystems/print-bridge-vue` | Vue / Nuxt | Publicado 0.1.0 |

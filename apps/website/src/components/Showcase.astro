@@ -24,8 +24,8 @@ const examples = [
     <>
       <h1 class="text-4xl font-bold">{es ? "Frameworks compatibles" : "Supported frameworks"}</h1>
       <p class="mt-3 max-w-3xl text-slate-600 dark:text-slate-300">{es
-        ? "Todas las integraciones usan el mismo núcleo y comparten una sola conexión con el agente. Solo el SDK base (0.3.0) está publicado; las integraciones están en el repositorio y se publicarán en GitHub Packages tras su aprobación."
-        : "Every integration uses the same core and shares a single agent connection. Only the base SDK (0.3.0) is published; the integrations are in the repository and will be published to GitHub Packages once approved."}</p>
+        ? "Todas las integraciones usan el mismo núcleo y comparten una sola conexión con el agente. Están publicadas en GitHub Packages (requiere autenticarse con un token read:packages para instalar)."
+        : "Every integration uses the same core and shares a single agent connection. They are published to GitHub Packages (installing requires a read:packages token)."}</p>
       <div class="mt-10 grid gap-4 md:grid-cols-2">
         {frameworks.map((f) => (
           <a class="card block p-6 transition hover:border-brand-500" href={href(lang, f.doc)}>

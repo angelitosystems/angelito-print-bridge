@@ -14,5 +14,4 @@ GitHub Packages **requires authentication to install npm packages, even public o
 ```
 3. Install: `npm install @angelitosystems/print-bridge`
 
-Only the core package (0.3.0) is published today; the React, Angular, Svelte and Vue integrations are in the repository
-and will be published after approval.
+Published: `@angelitosystems/print-bridge` 0.4.0 and the React, Vue, Svelte and Angular integrations 0.1.0.
